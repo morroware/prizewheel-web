@@ -486,6 +486,257 @@ $advanced = $c['advanced'] ?? [];
     .wheel-status.ready { color: var(--status-ready); border-color: var(--status-ready); }
     <?php endif; ?>
 
+    /* Cooldown Timer Ring */
+    .cooldown-ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: calc(100% + 60px);
+      height: calc(100% + 60px);
+      pointer-events: none;
+      z-index: 5;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .cooldown-ring.active {
+      opacity: 1;
+    }
+
+    .cooldown-ring svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .cooldown-ring circle {
+      fill: none;
+      stroke-width: 6;
+      stroke-linecap: round;
+    }
+
+    .cooldown-ring .ring-bg {
+      stroke: rgba(255, 255, 255, 0.1);
+    }
+
+    .cooldown-ring .ring-progress {
+      stroke: var(--status-cooldown);
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 0;
+      filter: drop-shadow(0 0 8px var(--status-cooldown));
+      transition: stroke-dashoffset 0.1s linear;
+    }
+
+    .cooldown-ring .cooldown-text {
+      position: absolute;
+      bottom: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--font-heading);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--status-cooldown);
+      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      white-space: nowrap;
+    }
+
+    /* Loading Spinner */
+    .loading-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .loading-overlay.active {
+      display: flex;
+    }
+
+    .loading-spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(255, 215, 0, 0.2);
+      border-top-color: var(--color-primary);
+      border-radius: 50%;
+      animation: loadingSpin 1s linear infinite;
+    }
+
+    @keyframes loadingSpin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--color-text-secondary);
+    }
+
+    /* Toast Notifications */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 400px;
+    }
+
+    .toast {
+      padding: 16px 20px;
+      border-radius: 12px;
+      background: rgba(26, 26, 46, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 215, 0, 0.2);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: toastSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor: pointer;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .toast:hover {
+      transform: translateX(-5px);
+    }
+
+    .toast.hiding {
+      animation: toastSlideOut 0.3s ease forwards;
+    }
+
+    @keyframes toastSlideIn {
+      from {
+        transform: translateX(120%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes toastSlideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(120%);
+        opacity: 0;
+      }
+    }
+
+    .toast-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .toast-content {
+      flex: 1;
+    }
+
+    .toast-title {
+      font-family: var(--font-heading);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 4px;
+    }
+
+    .toast-message {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      line-height: 1.4;
+    }
+
+    .toast.success { border-color: var(--color-success); }
+    .toast.success .toast-icon { color: var(--color-success); }
+    .toast.error { border-color: var(--color-error); }
+    .toast.error .toast-icon { color: var(--color-error); }
+    .toast.warning { border-color: var(--color-warning); }
+    .toast.warning .toast-icon { color: var(--color-warning); }
+    .toast.info { border-color: var(--status-cooldown); }
+    .toast.info .toast-icon { color: var(--status-cooldown); }
+
+    /* Modal Close Button and Countdown */
+    .modal-close-btn {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: var(--color-text-secondary);
+      transition: all 0.2s ease;
+      z-index: 10;
+    }
+
+    .modal-close-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: var(--color-primary);
+      color: var(--color-text-primary);
+      transform: scale(1.1);
+    }
+
+    .modal-countdown {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 25px;
+      border: 1px solid rgba(255, 215, 0, 0.2);
+    }
+
+    .modal-countdown-text {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+    }
+
+    .modal-countdown-timer {
+      font-family: var(--font-heading);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-primary);
+      min-width: 24px;
+      text-align: center;
+    }
+
+    .modal-countdown-bar {
+      width: 100px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .modal-countdown-progress {
+      height: 100%;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+      border-radius: 2px;
+      transition: width 0.1s linear;
+    }
+
     .web-only-badge {
       position: fixed;
       bottom: 20px;
@@ -511,6 +762,9 @@ $advanced = $c['advanced'] ?? [];
 </head>
 <body>
   <canvas id="fxCanvas"></canvas>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
 
   <?php if (!empty($branding['logo_url']) || !empty($branding['title'])): ?>
   <div class="branding-header">
@@ -540,16 +794,39 @@ $advanced = $c['advanced'] ?? [];
       <?php endif; ?>
       <canvas id="wheelCanvas" aria-label="Prize wheel - click or press space to spin" tabindex="0" autofocus></canvas>
       <div class="pointer"></div>
+
+      <!-- Cooldown Timer Ring -->
+      <div class="cooldown-ring" id="cooldownRing">
+        <svg viewBox="0 0 100 100">
+          <circle class="ring-bg" cx="50" cy="50" r="48"/>
+          <circle class="ring-progress" id="cooldownProgress" cx="50" cy="50" r="48"/>
+        </svg>
+        <div class="cooldown-text" id="cooldownText">Cooldown: 3s</div>
+      </div>
+
+      <!-- Loading Overlay -->
+      <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Connecting...</div>
+      </div>
     </div>
   </div>
 
   <div class="winner-modal" id="winnerModal">
     <div class="winner-card" id="winnerCard">
+      <button class="modal-close-btn" id="modalCloseBtn" aria-label="Close">&#10005;</button>
       <div class="castle-crest" id="crestIcon"><?php echo $modal['winner']['crest_icon'] ?? '&#127942;'; ?></div>
       <div class="winner-badge" id="winnerBadge"><?php echo htmlspecialchars($modal['winner']['badge_text'] ?? 'WINNER'); ?></div>
       <div class="winner-title" id="winnerTitle"><?php echo htmlspecialchars($modal['winner']['title_text'] ?? 'Royal Victory'); ?></div>
       <h1 id="winnerName" class="winner-name"></h1>
       <div class="winner-description" id="winnerDescription"></div>
+      <div class="modal-countdown" id="modalCountdown">
+        <span class="modal-countdown-text">Closing in</span>
+        <span class="modal-countdown-timer" id="modalCountdownTimer">6</span>
+        <div class="modal-countdown-bar">
+          <div class="modal-countdown-progress" id="modalCountdownProgress"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -637,6 +914,126 @@ $advanced = $c['advanced'] ?? [];
     const winnerBadge = document.getElementById('winnerBadge');
     const crestIcon = document.getElementById('crestIcon');
     const wheelStatus = document.getElementById('wheelStatus');
+    const toastContainer = document.getElementById('toastContainer');
+    const cooldownRing = document.getElementById('cooldownRing');
+    const cooldownProgress = document.getElementById('cooldownProgress');
+    const cooldownText = document.getElementById('cooldownText');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+    const modalCountdownTimer = document.getElementById('modalCountdownTimer');
+    const modalCountdownProgress = document.getElementById('modalCountdownProgress');
+
+    // Request debouncing
+    let lastSpinRequest = 0;
+    const DEBOUNCE_MS = 500;
+
+    // Network configuration
+    const FETCH_TIMEOUT_MS = 10000;
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY_MS = 1000;
+
+    // Toast Notification System
+    const Toast = {
+      show(type, title, message, duration = 4000) {
+        const icons = {
+          success: '&#10003;',
+          error: '&#10007;',
+          warning: '&#9888;',
+          info: '&#8505;'
+        };
+
+        const toast = document.createElement('div');
+        toast.className = 'toast ' + type;
+        toast.innerHTML =
+          '<span class="toast-icon">' + icons[type] + '</span>' +
+          '<div class="toast-content">' +
+            '<div class="toast-title">' + title + '</div>' +
+            '<div class="toast-message">' + message + '</div>' +
+          '</div>';
+
+        toast.addEventListener('click', function() {
+          Toast.dismiss(toast);
+        });
+
+        toastContainer.appendChild(toast);
+
+        setTimeout(function() {
+          Toast.dismiss(toast);
+        }, duration);
+
+        return toast;
+      },
+
+      dismiss(toast) {
+        if (!toast || toast.classList.contains('hiding')) return;
+        toast.classList.add('hiding');
+        setTimeout(function() {
+          if (toast.parentNode) {
+            toast.parentNode.removeChild(toast);
+          }
+        }, 300);
+      },
+
+      success(title, message) { return this.show('success', title, message); },
+      error(title, message) { return this.show('error', title, message, 6000); },
+      warning(title, message) { return this.show('warning', title, message, 5000); },
+      info(title, message) { return this.show('info', title, message); }
+    };
+
+    // Loading overlay control
+    function showLoading(text) {
+      if (loadingOverlay) {
+        loadingOverlay.querySelector('.loading-text').textContent = text || 'Loading...';
+        loadingOverlay.classList.add('active');
+      }
+    }
+
+    function hideLoading() {
+      if (loadingOverlay) {
+        loadingOverlay.classList.remove('active');
+      }
+    }
+
+    // Fetch with timeout and retry
+    async function fetchWithRetry(url, options, retries = MAX_RETRIES) {
+      for (let i = 0; i < retries; i++) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(function() { controller.abort(); }, FETCH_TIMEOUT_MS);
+
+          const response = await fetch(url, {
+            ...options,
+            signal: controller.signal
+          });
+
+          clearTimeout(timeoutId);
+
+          if (!response.ok) {
+            throw new Error('Server returned ' + response.status);
+          }
+
+          return response;
+        } catch (error) {
+          const isLastAttempt = i === retries - 1;
+          const isTimeout = error.name === 'AbortError';
+          const isNetworkError = error.message === 'Failed to fetch' || error.message.includes('NetworkError');
+
+          if (isLastAttempt) {
+            if (isTimeout) {
+              throw new Error('Request timed out. Please check your connection.');
+            } else if (isNetworkError) {
+              throw new Error('Network error. Please check your internet connection.');
+            }
+            throw error;
+          }
+
+          // Wait before retrying with exponential backoff
+          await new Promise(function(resolve) {
+            setTimeout(resolve, RETRY_DELAY_MS * Math.pow(2, i));
+          });
+        }
+      }
+    }
 
     // Sound Manager
     const SoundManager = {
@@ -735,10 +1132,30 @@ $advanced = $c['advanced'] ?? [];
     }
 
     async function requestSpin() {
+      // Debounce rapid clicks
+      const now = Date.now();
+      if (now - lastSpinRequest < DEBOUNCE_MS) {
+        console.log('Spin debounced - too fast');
+        return false;
+      }
+      lastSpinRequest = now;
+
       if (wheelSpinState.isSpinning || wheelSpinState.modalVisible || wheelSpinState.cooldownActive) {
         console.log('Spin blocked - wheel is busy');
+
+        let reason = 'Please wait...';
+        if (wheelSpinState.isSpinning) {
+          reason = 'Wheel is spinning...';
+        } else if (wheelSpinState.modalVisible) {
+          reason = 'Close the result first';
+        } else if (wheelSpinState.cooldownActive) {
+          reason = 'Cooling down...';
+        }
+
+        Toast.info('Not Ready', reason);
+
         if (wheelStatus) {
-          wheelStatus.textContent = 'Please wait...';
+          wheelStatus.textContent = reason;
           wheelStatus.className = 'wheel-status visible spinning';
           setTimeout(updateWheelStatus, 1000);
         }
@@ -746,32 +1163,71 @@ $advanced = $c['advanced'] ?? [];
       }
 
       console.log('Spin request sent');
+      showLoading('Spinning...');
 
       try {
-        const response = await fetch(window.BASE_PATH + '/api/spin', {
+        const response = await fetchWithRetry(window.BASE_PATH + '/api/spin', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ user_info: 'display_' + Date.now() })
         });
 
         const data = await response.json();
+        hideLoading();
 
         if (data.success) {
           handleSpinStart(data);
         } else {
           console.log('Spin rejected:', data.error);
+
+          // Provide specific error messages
+          let errorTitle = 'Cannot Spin';
+          let errorMsg = data.error || 'Please try again';
+
+          if (data.error && data.error.toLowerCase().includes('cooldown')) {
+            errorTitle = 'Cooldown Active';
+            errorMsg = 'Please wait for the cooldown to finish.';
+          } else if (data.error && data.error.toLowerCase().includes('spinning')) {
+            errorTitle = 'Already Spinning';
+            errorMsg = 'A spin is already in progress.';
+          } else if (data.error && data.error.toLowerCase().includes('no prizes')) {
+            errorTitle = 'No Prizes';
+            errorMsg = 'No prizes are available. Please contact support.';
+          }
+
+          Toast.warning(errorTitle, errorMsg);
+
           if (wheelStatus) {
-            wheelStatus.textContent = data.error || 'Please wait';
+            wheelStatus.textContent = errorMsg;
             wheelStatus.className = 'wheel-status visible spinning';
             setTimeout(updateWheelStatus, 2000);
           }
         }
       } catch (error) {
+        hideLoading();
         console.error('Spin request failed:', error);
+
+        // Specific error messages based on error type
+        let errorTitle = 'Connection Error';
+        let errorMsg = error.message || 'Something went wrong. Please try again.';
+
+        if (error.message.includes('timed out')) {
+          errorTitle = 'Request Timeout';
+          errorMsg = 'The server is taking too long. Please try again.';
+        } else if (error.message.includes('Network')) {
+          errorTitle = 'Network Error';
+          errorMsg = 'Please check your internet connection and try again.';
+        } else if (error.message.includes('Server returned')) {
+          errorTitle = 'Server Error';
+          errorMsg = 'The server encountered an error. Please try again later.';
+        }
+
+        Toast.error(errorTitle, errorMsg);
+
         if (wheelStatus) {
-          wheelStatus.textContent = 'Error - try again';
+          wheelStatus.textContent = errorMsg;
           wheelStatus.className = 'wheel-status visible spinning';
-          setTimeout(updateWheelStatus, 2000);
+          setTimeout(updateWheelStatus, 3000);
         }
       }
 
@@ -869,6 +1325,9 @@ $advanced = $c['advanced'] ?? [];
       populateWinnerModal(winner);
       winnerModal.style.display = 'flex';
 
+      // Start modal countdown animation
+      startModalCountdown(AUTO_CLOSE_MS);
+
       <?php if ($effects['confetti']['enabled'] ?? true): ?>
       const winnerCount = <?php echo $effects['confetti']['winner_count'] ?? 150; ?>;
       const loserCount = <?php echo $effects['confetti']['loser_count'] ?? 50; ?>;
@@ -890,13 +1349,55 @@ $advanced = $c['advanced'] ?? [];
       if (winnerModal._autoclose) clearTimeout(winnerModal._autoclose);
       winnerModal._autoclose = setTimeout(closeWinnerModal, AUTO_CLOSE_MS);
 
-      fetch(window.BASE_PATH + '/api/spin/complete', { method: 'POST' }).catch(function() {});
+      fetchWithRetry(window.BASE_PATH + '/api/spin/complete', { method: 'POST' }, 1).catch(function() {});
+    }
+
+    // Modal countdown animation
+    let modalCountdownInterval = null;
+
+    function startModalCountdown(duration) {
+      if (modalCountdownInterval) {
+        clearInterval(modalCountdownInterval);
+      }
+
+      const startTime = Date.now();
+      const endTime = startTime + duration;
+
+      function updateCountdown() {
+        const remaining = Math.max(0, endTime - Date.now());
+        const progress = 1 - (remaining / duration);
+        const secondsLeft = Math.ceil(remaining / 1000);
+
+        if (modalCountdownTimer) {
+          modalCountdownTimer.textContent = secondsLeft;
+        }
+
+        if (modalCountdownProgress) {
+          modalCountdownProgress.style.width = ((1 - progress) * 100) + '%';
+        }
+
+        if (remaining <= 0) {
+          clearInterval(modalCountdownInterval);
+          modalCountdownInterval = null;
+        }
+      }
+
+      updateCountdown();
+      modalCountdownInterval = setInterval(updateCountdown, 100);
+    }
+
+    function stopModalCountdown() {
+      if (modalCountdownInterval) {
+        clearInterval(modalCountdownInterval);
+        modalCountdownInterval = null;
+      }
     }
 
     function closeWinnerModal() {
       winnerModal.style.display = 'none';
       wheelSpinState.modalVisible = false;
       updateWheelStatus();
+      stopModalCountdown();
 
       if (winnerModal._autoclose) {
         clearTimeout(winnerModal._autoclose);
@@ -906,16 +1407,59 @@ $advanced = $c['advanced'] ?? [];
     function startCooldown(duration) {
       wheelSpinState.cooldownActive = true;
       updateWheelStatus();
-      const endTime = Date.now() + duration;
+      const startTime = Date.now();
+      const endTime = startTime + duration;
 
       console.log('Cooldown started for ' + duration + 'ms');
 
+      // Show cooldown ring
+      if (cooldownRing) {
+        cooldownRing.classList.add('active');
+        // Calculate circumference for progress animation
+        const circumference = 2 * Math.PI * 48; // r=48 from SVG
+        if (cooldownProgress) {
+          cooldownProgress.style.strokeDasharray = circumference;
+          cooldownProgress.style.strokeDashoffset = '0';
+        }
+      }
+
       const interval = setInterval(function() {
         const remaining = endTime - Date.now();
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+
+        // Update cooldown ring progress
+        if (cooldownProgress) {
+          const circumference = 2 * Math.PI * 48;
+          const offset = circumference * progress;
+          cooldownProgress.style.strokeDashoffset = offset;
+        }
+
+        // Update cooldown text
+        if (cooldownText) {
+          const secondsLeft = Math.ceil(remaining / 1000);
+          cooldownText.textContent = 'Ready in ' + secondsLeft + 's';
+        }
+
+        // Update status indicator with countdown
+        if (wheelStatus && wheelSpinState.cooldownActive) {
+          const secondsLeft = Math.ceil(remaining / 1000);
+          wheelStatus.textContent = 'Cooldown: ' + secondsLeft + 's';
+        }
+
         if (remaining <= 0) {
           clearInterval(interval);
           wheelSpinState.cooldownActive = false;
           updateWheelStatus();
+
+          // Hide cooldown ring
+          if (cooldownRing) {
+            cooldownRing.classList.remove('active');
+          }
+
+          // Show ready toast
+          Toast.success('Ready!', 'The wheel is ready to spin again.');
+
           console.log('Cooldown complete');
         }
       }, 100);
@@ -1003,6 +1547,22 @@ $advanced = $c['advanced'] ?? [];
             const gradient = baseColor;
             <?php endif; ?>
 
+            // Draw 3D depth shadow first (underneath the segment)
+            wctx.save();
+            wctx.beginPath();
+            wctx.moveTo(0, 0);
+            wctx.arc(0, 0, radius, startAngle, endAngle);
+            wctx.closePath();
+            // Inner shadow for depth
+            wctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+            wctx.shadowBlur = 15;
+            wctx.shadowOffsetX = 0;
+            wctx.shadowOffsetY = 0;
+            wctx.fillStyle = gradient;
+            wctx.fill();
+            wctx.restore();
+
+            // Main segment fill
             wctx.beginPath();
             wctx.moveTo(0, 0);
             wctx.arc(0, 0, radius, startAngle, endAngle);
@@ -1010,8 +1570,44 @@ $advanced = $c['advanced'] ?? [];
             wctx.fillStyle = gradient;
             wctx.fill();
 
+            // 3D bevel effect - highlight on one edge
+            const midAngle = startAngle + segmentAngle / 2;
+            wctx.save();
+            wctx.beginPath();
+            wctx.moveTo(0, 0);
+            wctx.arc(0, 0, radius * 0.98, startAngle + 0.02, startAngle + segmentAngle * 0.15);
+            wctx.lineTo(0, 0);
+            wctx.closePath();
+            wctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+            wctx.fill();
+            wctx.restore();
+
+            // 3D bevel effect - shadow on opposite edge
+            wctx.save();
+            wctx.beginPath();
+            wctx.moveTo(0, 0);
+            wctx.arc(0, 0, radius * 0.98, endAngle - segmentAngle * 0.15, endAngle - 0.02);
+            wctx.lineTo(0, 0);
+            wctx.closePath();
+            wctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+            wctx.fill();
+            wctx.restore();
+
+            // Inner arc shadow for depth
+            wctx.save();
+            wctx.beginPath();
+            wctx.arc(0, 0, radius * 0.92, startAngle + 0.05, endAngle - 0.05);
+            wctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+            wctx.lineWidth = radius * 0.08;
+            wctx.stroke();
+            wctx.restore();
+
             wctx.strokeStyle = '<?php echo $wheel['segments']['border_color'] ?? 'rgba(0,0,0,0.4)'; ?>';
             wctx.lineWidth = <?php echo $wheel['segments']['border_width'] ?? 3; ?>;
+            wctx.beginPath();
+            wctx.moveTo(0, 0);
+            wctx.arc(0, 0, radius, startAngle, endAngle);
+            wctx.closePath();
             wctx.stroke();
 
             wctx.strokeStyle = '<?php echo $wheel['segments']['inner_border_color'] ?? 'rgba(255,255,255,0.15)'; ?>';
@@ -1168,27 +1764,50 @@ $advanced = $c['advanced'] ?? [];
     function spawnConfetti(count, isWinner) {
       isWinner = isWinner !== false;
       const colors = isWinner ? WINNER_COLORS : LOSER_COLORS;
-      for (let i = 0; i < count; i++) {
-        confetti.particles.push({
-          x: Math.random() * window.innerWidth,
-          y: -20,
-          vx: (Math.random() - 0.5) * 8,
-          vy: Math.random() * 4 + 2,
-          gravity: CONFETTI_GRAVITY,
-          width: Math.random() * 10 + 6,
-          height: Math.random() * 14 + 8,
-          angle: Math.random() * Math.PI * 2,
-          angleVel: (Math.random() - 0.5) * 0.3,
-          color: colors[Math.floor(Math.random() * colors.length)],
-          life: 0,
-          maxLife: CONFETTI_MAX_LIFE,
-          shape: Math.random() > 0.3 ? 'rect' : 'circle',
-          shimmer: Math.random() * 0.5 + 0.5
-        });
-      }
-      if (!confetti.active) {
-        confetti.active = true;
-        animateConfetti();
+
+      // Spawn in waves for more natural effect
+      const waveCount = 3;
+      const particlesPerWave = Math.ceil(count / waveCount);
+
+      for (let wave = 0; wave < waveCount; wave++) {
+        setTimeout(function() {
+          for (let i = 0; i < particlesPerWave; i++) {
+            // Spawn from multiple positions for winner (more dramatic)
+            const spawnX = isWinner
+              ? (Math.random() < 0.5 ? Math.random() * window.innerWidth * 0.3 : window.innerWidth * 0.7 + Math.random() * window.innerWidth * 0.3)
+              : window.innerWidth * 0.3 + Math.random() * window.innerWidth * 0.4;
+
+            const spawnY = isWinner
+              ? -20 - Math.random() * 50
+              : window.innerHeight * 0.3;
+
+            confetti.particles.push({
+              x: spawnX,
+              y: spawnY,
+              vx: (Math.random() - 0.5) * (isWinner ? 12 : 6),
+              vy: isWinner ? Math.random() * 6 + 3 : (Math.random() - 0.5) * 8 - 4,
+              gravity: CONFETTI_GRAVITY * (0.8 + Math.random() * 0.4),
+              friction: 0.99,
+              width: Math.random() * 12 + 6,
+              height: Math.random() * 16 + 8,
+              angle: Math.random() * Math.PI * 2,
+              angleVel: (Math.random() - 0.5) * 0.4,
+              color: colors[Math.floor(Math.random() * colors.length)],
+              life: 0,
+              maxLife: CONFETTI_MAX_LIFE + Math.random() * 100,
+              shape: Math.random() > 0.4 ? 'rect' : (Math.random() > 0.5 ? 'circle' : 'star'),
+              shimmer: Math.random() * 0.5 + 0.5,
+              scale: 0.8 + Math.random() * 0.4,
+              wobble: Math.random() * Math.PI * 2,
+              wobbleSpeed: 0.05 + Math.random() * 0.05
+            });
+          }
+
+          if (!confetti.active) {
+            confetti.active = true;
+            animateConfetti();
+          }
+        }, wave * 150);
       }
     }
 
@@ -1196,40 +1815,81 @@ $advanced = $c['advanced'] ?? [];
       fctx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
 
       confetti.particles = confetti.particles.filter(function(p) {
+        // Apply physics
         p.vy += p.gravity;
-        p.x += p.vx;
+        p.vx *= p.friction;
+        p.vy *= p.friction;
+
+        // Add wobble for more natural movement
+        p.wobble += p.wobbleSpeed;
+        p.x += p.vx + Math.sin(p.wobble) * 0.5;
         p.y += p.vy;
         p.angle += p.angleVel;
         p.life++;
 
-        const alpha = (1 - (p.life / p.maxLife)) * p.shimmer;
+        // Smooth fade-out with easing
+        const lifeProgress = p.life / p.maxLife;
+        const fadeStart = 0.6; // Start fading at 60% life
+        let alpha;
+        if (lifeProgress < fadeStart) {
+          alpha = p.shimmer;
+        } else {
+          // Smooth ease-out fade
+          const fadeProgress = (lifeProgress - fadeStart) / (1 - fadeStart);
+          alpha = p.shimmer * (1 - Math.pow(fadeProgress, 2));
+        }
+
+        // Scale down as particle ages
+        const scaleMultiplier = lifeProgress > 0.8 ? 1 - (lifeProgress - 0.8) * 2 : 1;
 
         fctx.save();
         fctx.translate(p.x, p.y);
         fctx.rotate(p.angle);
-        fctx.globalAlpha = alpha;
+        fctx.scale(p.scale * scaleMultiplier, p.scale * scaleMultiplier);
+        fctx.globalAlpha = Math.max(0, alpha);
 
         fctx.shadowColor = p.color;
-        fctx.shadowBlur = 10;
+        fctx.shadowBlur = 8 * alpha;
         fctx.fillStyle = p.color;
 
         if (p.shape === 'rect') {
           fctx.fillRect(-p.width / 2, -p.height / 2, p.width, p.height);
-        } else {
+        } else if (p.shape === 'circle') {
           fctx.beginPath();
           fctx.arc(0, 0, p.width / 2, 0, Math.PI * 2);
+          fctx.fill();
+        } else if (p.shape === 'star') {
+          // Draw a small star shape
+          fctx.beginPath();
+          for (let s = 0; s < 5; s++) {
+            const starAngle = (s * Math.PI * 2) / 5 - Math.PI / 2;
+            const outerX = Math.cos(starAngle) * p.width / 2;
+            const outerY = Math.sin(starAngle) * p.width / 2;
+            const innerAngle = starAngle + Math.PI / 5;
+            const innerX = Math.cos(innerAngle) * p.width / 4;
+            const innerY = Math.sin(innerAngle) * p.width / 4;
+            if (s === 0) {
+              fctx.moveTo(outerX, outerY);
+            } else {
+              fctx.lineTo(outerX, outerY);
+            }
+            fctx.lineTo(innerX, innerY);
+          }
+          fctx.closePath();
           fctx.fill();
         }
 
         fctx.restore();
 
-        return p.life < p.maxLife && p.y < window.innerHeight + 100;
+        return p.life < p.maxLife && p.y < window.innerHeight + 100 && alpha > 0.01;
       });
 
       if (confetti.particles.length > 0) {
         requestAnimationFrame(animateConfetti);
       } else {
         confetti.active = false;
+        // Clear canvas completely when done
+        fctx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
       }
     }
     <?php else: ?>
@@ -1306,7 +1966,27 @@ $advanced = $c['advanced'] ?? [];
         requestSpin();
       });
 
-      winnerModal.addEventListener('click', closeWinnerModal);
+      // Modal close handlers
+      winnerModal.addEventListener('click', function(e) {
+        // Only close if clicking the backdrop, not the card content
+        if (e.target === winnerModal) {
+          closeWinnerModal();
+        }
+      });
+
+      if (modalCloseBtn) {
+        modalCloseBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          closeWinnerModal();
+        });
+      }
+
+      // Prevent card clicks from closing modal (except close button)
+      if (winnerCard) {
+        winnerCard.addEventListener('click', function(e) {
+          e.stopPropagation();
+        });
+      }
 
       <?php if ($c['accessibility']['keyboard_controls'] ?? true): ?>
       window.addEventListener('keydown', function(e) {
