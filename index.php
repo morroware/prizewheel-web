@@ -482,21 +482,19 @@ if (strpos($path, '/api/') === 0) {
 
     // POST /api/spin - Trigger a spin
     if ($path === '/api/spin' && $requestMethod === 'POST') {
-        $state = getWheelState();
         $config = getConfig();
-
-        // Check if already spinning or in cooldown
-        $now = time();
         $cooldown = $config['cooldown_seconds'] ?? 3;
         $spinDuration = $config['spin_duration_seconds'] ?? 8;
+        $now = time();
 
-        if ($state['is_spinning']) {
-            jsonResponse(['success' => false, 'error' => 'Wheel is already spinning', 'state' => 'spinning']);
-        }
+        // Use session-based cooldown instead of global state
+        // This allows each browser/session to work independently
+        $sessionLastSpin = $_SESSION['last_spin_time'] ?? 0;
+        $totalCooldown = $spinDuration + $cooldown;
 
-        if ($state['last_spin_time'] && ($now - $state['last_spin_time']) < ($spinDuration + $cooldown)) {
-            $remaining = ($spinDuration + $cooldown) - ($now - $state['last_spin_time']);
-            jsonResponse(['success' => false, 'error' => 'Please wait', 'cooldown_remaining' => $remaining, 'state' => 'cooldown']);
+        if ($sessionLastSpin && ($now - $sessionLastSpin) < $totalCooldown) {
+            $remaining = $totalCooldown - ($now - $sessionLastSpin);
+            jsonResponse(['success' => false, 'error' => 'Please wait ' . $remaining . ' seconds', 'cooldown_remaining' => $remaining, 'state' => 'cooldown']);
         }
 
         // Select winner
@@ -510,12 +508,8 @@ if (strpos($path, '/api/') === 0) {
         // Create spin ID
         $spinId = uniqid('spin_');
 
-        // Update state
-        $state['is_spinning'] = true;
-        $state['last_spin_time'] = $now;
-        $state['current_winner'] = $winner;
-        $state['spin_id'] = $spinId;
-        saveWheelState($state);
+        // Update session-based cooldown (not global state)
+        $_SESSION['last_spin_time'] = $now;
 
         // Record in history
         $historyEntry = [
@@ -539,63 +533,49 @@ if (strpos($path, '/api/') === 0) {
 
     // GET /api/spin/status - Get current spin status
     if ($path === '/api/spin/status' && $requestMethod === 'GET') {
-        $state = getWheelState();
         $config = getConfig();
-
         $spinDuration = $config['spin_duration_seconds'] ?? 8;
         $cooldown = $config['cooldown_seconds'] ?? 3;
         $now = time();
 
-        // Check if spin has completed
-        if ($state['is_spinning'] && $state['last_spin_time']) {
-            $elapsed = $now - $state['last_spin_time'];
-            if ($elapsed >= $spinDuration) {
-                $state['is_spinning'] = false;
-                saveWheelState($state);
-            }
-        }
+        // Use session-based state
+        $sessionLastSpin = $_SESSION['last_spin_time'] ?? 0;
+        $totalCooldown = $spinDuration + $cooldown;
 
-        // Calculate remaining cooldown
         $cooldownRemaining = 0;
-        if ($state['last_spin_time']) {
-            $totalWait = $spinDuration + $cooldown;
-            $elapsed = $now - $state['last_spin_time'];
-            if ($elapsed < $totalWait) {
-                $cooldownRemaining = $totalWait - $elapsed;
-            }
-        }
-
         $status = 'ready';
-        if ($state['is_spinning']) {
-            $status = 'spinning';
-        } elseif ($cooldownRemaining > 0) {
-            $status = 'cooldown';
+
+        if ($sessionLastSpin) {
+            $elapsed = $now - $sessionLastSpin;
+            if ($elapsed < $spinDuration) {
+                $status = 'spinning';
+            } elseif ($elapsed < $totalCooldown) {
+                $status = 'cooldown';
+                $cooldownRemaining = $totalCooldown - $elapsed;
+            }
         }
 
         jsonResponse([
             'success' => true,
             'status' => $status,
-            'is_spinning' => $state['is_spinning'],
-            'cooldown_remaining' => $cooldownRemaining,
-            'current_winner' => $state['current_winner'],
-            'spin_id' => $state['spin_id']
+            'is_spinning' => ($status === 'spinning'),
+            'cooldown_remaining' => $cooldownRemaining
         ]);
     }
 
-    // POST /api/spin/complete - Mark spin as complete
+    // POST /api/spin/complete - Mark spin as complete (no-op now, kept for compatibility)
     if ($path === '/api/spin/complete' && $requestMethod === 'POST') {
-        $state = getWheelState();
-        $state['is_spinning'] = false;
-        saveWheelState($state);
-
         jsonResponse([
-            'success' => true,
-            'winner' => $state['current_winner']
+            'success' => true
         ]);
     }
 
-    // POST /api/state/reset - Force reset wheel state (for stuck wheels)
+    // POST /api/state/reset - Force reset wheel state (resets session cooldown)
     if ($path === '/api/state/reset' && $requestMethod === 'POST') {
+        // Reset session cooldown
+        $_SESSION['last_spin_time'] = 0;
+
+        // Also reset global state file for backwards compatibility
         $state = [
             'is_spinning' => false,
             'last_spin_time' => 0,
