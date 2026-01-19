@@ -84,6 +84,55 @@
 
         .notification { position: fixed; top: 20px; right: 20px; z-index: 2000; padding: 15px 20px; border-radius: 8px; font-weight: 600; animation: slideIn 0.3s ease-out; }
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+        /* Customization Styles */
+        .preset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .preset-card { background: rgba(0,0,0,0.3); border: 2px solid rgba(255,215,0,0.2); border-radius: 12px; padding: 15px; cursor: pointer; transition: all 0.3s ease; text-align: center; }
+        .preset-card:hover { border-color: var(--gold-1); transform: translateY(-2px); }
+        .preset-card.active { border-color: var(--gold-1); background: rgba(255,215,0,0.1); }
+        .preset-colors { display: flex; gap: 5px; justify-content: center; margin-bottom: 10px; }
+        .preset-color { width: 24px; height: 24px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); }
+        .preset-name { font-weight: 600; font-size: 14px; margin-bottom: 5px; }
+        .preset-desc { font-size: 11px; opacity: 0.7; }
+
+        .customization-section { background: rgba(255,215,0,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        .customization-section-title { font-family: 'Cinzel', serif; color: var(--gold-1); font-size: 16px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .customization-section-title::before { content: ''; display: inline-block; width: 8px; height: 8px; background: var(--gold-1); border-radius: 50%; }
+        .customization-section.collapsed .customization-section-content { display: none; }
+        .customization-section-title::after { content: '\\25BC'; margin-left: auto; font-size: 10px; transition: transform 0.3s; }
+        .customization-section.collapsed .customization-section-title::after { transform: rotate(-90deg); }
+
+        .color-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+        .color-input-group { display: flex; align-items: center; gap: 10px; }
+        .color-input-group label { flex: 1; font-size: 12px; }
+        .color-input-group input[type="color"] { width: 40px; height: 30px; padding: 0; border: none; border-radius: 5px; cursor: pointer; }
+        .color-input-group input[type="text"] { width: 80px; padding: 5px 8px; font-size: 11px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.3); border-radius: 4px; color: white; font-family: monospace; }
+
+        .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .toggle-row:last-child { border-bottom: none; }
+        .toggle-label { font-size: 13px; }
+        .toggle-switch { position: relative; width: 50px; height: 26px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; cursor: pointer; inset: 0; background: rgba(0,0,0,0.4); border-radius: 26px; transition: 0.3s; }
+        .toggle-slider::before { content: ''; position: absolute; height: 20px; width: 20px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s; }
+        .toggle-switch input:checked + .toggle-slider { background: var(--gold-1); }
+        .toggle-switch input:checked + .toggle-slider::before { transform: translateX(24px); }
+
+        .slider-row { padding: 10px 0; }
+        .slider-row label { display: block; font-size: 13px; margin-bottom: 8px; }
+        .slider-row input[type="range"] { width: 100%; }
+        .slider-value { font-size: 12px; color: var(--gold-1); float: right; }
+
+        .branding-preview { background: rgba(0,0,0,0.3); border-radius: 10px; padding: 20px; text-align: center; margin-top: 15px; }
+        .branding-preview img { max-height: 60px; margin-bottom: 10px; }
+
+        .action-buttons { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+        .action-buttons .btn { flex: 1; min-width: 120px; }
+
+        .text-input-row { margin-bottom: 15px; }
+        .text-input-row label { display: block; font-size: 13px; margin-bottom: 5px; color: rgba(255,255,255,0.8); }
+        .text-input-row input, .text-input-row textarea { width: 100%; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.3); border-radius: 5px; color: white; font-family: 'Montserrat', sans-serif; }
+        .text-input-row textarea { min-height: 100px; resize: vertical; font-family: monospace; font-size: 12px; }
     </style>
 </head>
 <body>
@@ -108,6 +157,7 @@
             <div class="section">
                 <div class="tabs">
                     <div class="tab-link active" onclick="openTab(event, 'prizes')">Prizes</div>
+                    <div class="tab-link" onclick="openTab(event, 'customization')">Customization</div>
                     <div class="tab-link" onclick="openTab(event, 'settings')">Settings</div>
                     <div class="tab-link" onclick="openTab(event, 'sounds')">Sounds</div>
                     <div class="tab-link" onclick="openTab(event, 'system')">System</div>
@@ -119,6 +169,11 @@
                         <button class="btn btn-success" onclick="openPrizeModal()">+ Create New Prize</button>
                     </div>
                     <div id="prizesContainer" style="max-height: 500px; overflow-y: auto;"></div>
+                </div>
+
+                <div id="customization" class="tab-content">
+                    <h2 class="section-title">Theme & Customization</h2>
+                    <div id="customizationContainer"></div>
                 </div>
 
                 <div id="settings" class="tab-content">
@@ -361,6 +416,11 @@
                 <a href="${BASE_PATH}/api/export/csv" class="btn btn-info" download>Download CSV</a>
             </div>
             <div class="form-group">
+                <label>Reset Wheel State</label>
+                <p style="opacity: 0.7; font-size: 14px; margin-bottom: 10px;">If the wheel is stuck in "spinning" or "cooldown" state, use this to force reset it.</p>
+                <button class="btn btn-warning" onclick="resetWheelState()">Force Reset Wheel</button>
+            </div>
+            <div class="form-group">
                 <label>Clear Spin History</label>
                 <p style="opacity: 0.7; font-size: 14px; margin-bottom: 10px;">This will permanently delete all spin records. This action cannot be undone.</p>
                 <button class="btn btn-danger" onclick="clearHistory()">Clear History</button>
@@ -505,10 +565,462 @@
         }
     }
 
+    async function resetWheelState() {
+        try {
+            const response = await fetch(BASE_PATH + '/api/state/reset', { method: 'POST' });
+            const data = await response.json();
+            if (data.success) {
+                showNotification('Wheel state reset! Refresh the display page.');
+            } else {
+                showNotification(data.error || 'Failed to reset state.', 'error');
+            }
+        } catch (error) {
+            showNotification('Failed to reset wheel state.', 'error');
+        }
+    }
+
+    // ==================== CUSTOMIZATION ====================
+    let currentCustomization = {};
+    let themePresets = [];
+
+    async function loadCustomizationData() {
+        try {
+            const [customResponse, presetsResponse] = await Promise.all([
+                fetch(BASE_PATH + '/api/customization'),
+                fetch(BASE_PATH + '/api/presets/themes')
+            ]);
+
+            const customData = await customResponse.json();
+            const presetsData = await presetsResponse.json();
+
+            if (customData.success) {
+                currentCustomization = customData.customization;
+            }
+            if (presetsData.success) {
+                themePresets = presetsData.presets;
+            }
+
+            renderCustomization();
+        } catch (error) {
+            console.error('Failed to load customization:', error);
+            showNotification('Failed to load customization data', 'error');
+        }
+    }
+
+    function renderCustomization() {
+        const container = document.getElementById('customizationContainer');
+        const c = currentCustomization;
+        const theme = c.theme || {};
+        const colors = theme.colors || {};
+        const branding = c.branding || {};
+        const wheel = c.wheel || {};
+        const effects = c.effects || {};
+        const modal = c.modal || {};
+        const advanced = c.advanced || {};
+
+        container.innerHTML = `
+            <!-- Theme Presets -->
+            <div class="customization-section">
+                <div class="customization-section-title" onclick="toggleSection(this)">Theme Presets</div>
+                <div class="customization-section-content">
+                    <p style="font-size: 12px; opacity: 0.7; margin-bottom: 15px;">Select a preset theme to quickly change the look and feel of your wheel.</p>
+                    <div class="preset-grid">
+                        ${themePresets.map(preset => `
+                            <div class="preset-card ${theme.preset === preset.id ? 'active' : ''}" onclick="applyPreset('${preset.id}')">
+                                <div class="preset-colors">
+                                    ${(preset.preview_colors || []).map(color => `<div class="preset-color" style="background: ${color}"></div>`).join('')}
+                                </div>
+                                <div class="preset-name">${escapeHtml(preset.name)}</div>
+                                <div class="preset-desc">${escapeHtml(preset.description)}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Branding -->
+            <div class="customization-section">
+                <div class="customization-section-title" onclick="toggleSection(this)">Branding</div>
+                <div class="customization-section-content">
+                    <div class="form-grid">
+                        <div class="text-input-row">
+                            <label>Title</label>
+                            <input type="text" id="brandingTitle" value="${escapeHtml(branding.title || '')}" placeholder="Prize Wheel">
+                        </div>
+                        <div class="text-input-row">
+                            <label>Subtitle</label>
+                            <input type="text" id="brandingSubtitle" value="${escapeHtml(branding.subtitle || '')}" placeholder="Optional subtitle">
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="text-input-row">
+                            <label>Logo URL</label>
+                            <input type="text" id="brandingLogo" value="${escapeHtml(branding.logo_url || '')}" placeholder="/static/images/logo.png">
+                        </div>
+                        <div class="text-input-row">
+                            <label>Badge Text</label>
+                            <input type="text" id="brandingBadge" value="${escapeHtml(branding.badge_text || '')}" placeholder="Prize Wheel">
+                        </div>
+                    </div>
+                    <div class="toggle-row">
+                        <span class="toggle-label">Show Branding Badge</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="brandingShowBadge" ${branding.show_branding_badge !== false ? 'checked' : ''}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Theme Colors -->
+            <div class="customization-section">
+                <div class="customization-section-title" onclick="toggleSection(this)">Theme Colors</div>
+                <div class="customization-section-content">
+                    <div class="color-grid">
+                        ${renderColorInput('Primary', 'colorPrimary', colors.primary || '#FFD700')}
+                        ${renderColorInput('Secondary', 'colorSecondary', colors.secondary || '#6B46C1')}
+                        ${renderColorInput('Accent', 'colorAccent', colors.accent || '#FFA500')}
+                        ${renderColorInput('Background', 'colorBackground', colors.background || '#0a0a14')}
+                        ${renderColorInput('Background 2', 'colorBackgroundSecondary', colors.background_secondary || '#1a1a2e')}
+                        ${renderColorInput('Text', 'colorTextPrimary', colors.text_primary || '#ffffff')}
+                        ${renderColorInput('Success', 'colorSuccess', colors.success || '#4caf50')}
+                        ${renderColorInput('Error', 'colorError', colors.error || '#f44336')}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wheel Appearance -->
+            <div class="customization-section">
+                <div class="customization-section-title" onclick="toggleSection(this)">Wheel Appearance</div>
+                <div class="customization-section-content">
+                    <div class="form-grid">
+                        <div class="slider-row">
+                            <label>Wheel Size (vmin) <span class="slider-value" id="wheelSizeValue">${wheel.size?.size_vmin || 85}</span></label>
+                            <input type="range" id="wheelSize" value="${wheel.size?.size_vmin || 85}" min="50" max="95" oninput="document.getElementById('wheelSizeValue').textContent = this.value">
+                        </div>
+                        <div class="slider-row">
+                            <label>Max Size (px) <span class="slider-value" id="wheelMaxSizeValue">${wheel.size?.max_size_px || 900}</span></label>
+                            <input type="range" id="wheelMaxSize" value="${wheel.size?.max_size_px || 900}" min="400" max="1200" step="50" oninput="document.getElementById('wheelMaxSizeValue').textContent = this.value">
+                        </div>
+                    </div>
+                    <div class="toggle-row">
+                        <span class="toggle-label">Show Bezel</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="wheelBezelEnabled" ${wheel.bezel?.enabled !== false ? 'checked' : ''}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-row">
+                        <span class="toggle-label">Show Studs</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="wheelStudsEnabled" ${wheel.studs?.enabled !== false ? 'checked' : ''}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-row">
+                        <span class="toggle-label">Float Animation</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="wheelFloatEnabled" ${wheel.animation?.float_enabled !== false ? 'checked' : ''}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="slider-row" style="margin-top: 15px;">
+                        <label>Number of Studs <span class="slider-value" id="studCountValue">${wheel.studs?.count || 32}</span></label>
+                        <input type="range" id="studCount" value="${wheel.studs?.count || 32}" min="12" max="48" step="4" oninput="document.getElementById('studCountValue').textContent = this.value">
+                    </div>
+                    <div class="color-grid" style="margin-top: 15px;">
+                        ${renderColorInput('Pointer', 'wheelPointerColor', wheel.pointer?.color || '#FFD700')}
+                        ${renderColorInput('Center Icon', 'wheelCenterIconColor', wheel.center?.icon_color || '#FFD700')}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Effects -->
+            <div class="customization-section">
+                <div class="customization-section-title" onclick="toggleSection(this)">Effects</div>
+                <div class="customization-section-content">
+                    <div class="toggle-row">
+                        <span class="toggle-label">Enable Confetti</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="effectsConfetti" ${effects.confetti?.enabled !== false ? 'checked' : ''}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-row">
+                        <span class="toggle-label">Winner Flash Effect</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="effectsWinnerFlash" ${effects.winner_flash?.enabled !== false ? 'checked' : ''}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-row">
+                        <span class="toggle-label">Background Shimmer</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="effectsBackgroundShimmer" ${effects.background_shimmer?.enabled !== false ? 'checked' : ''}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="slider-row" style="margin-top: 15px;">
+                        <label>Winner Confetti Count <span class="slider-value" id="confettiWinnerValue">${effects.confetti?.winner_count || 150}</span></label>
+                        <input type="range" id="confettiWinnerCount" value="${effects.confetti?.winner_count || 150}" min="50" max="300" step="10" oninput="document.getElementById('confettiWinnerValue').textContent = this.value">
+                    </div>
+                    <div class="slider-row">
+                        <label>Loser Confetti Count <span class="slider-value" id="confettiLoserValue">${effects.confetti?.loser_count || 50}</span></label>
+                        <input type="range" id="confettiLoserCount" value="${effects.confetti?.loser_count || 50}" min="0" max="150" step="10" oninput="document.getElementById('confettiLoserValue').textContent = this.value">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Customization -->
+            <div class="customization-section">
+                <div class="customization-section-title" onclick="toggleSection(this)">Winner Modal</div>
+                <div class="customization-section-content">
+                    <div class="form-grid">
+                        <div class="text-input-row">
+                            <label>Winner Badge Text</label>
+                            <input type="text" id="modalWinnerBadge" value="${escapeHtml(modal.winner?.badge_text || 'WINNER')}">
+                        </div>
+                        <div class="text-input-row">
+                            <label>Winner Title Text</label>
+                            <input type="text" id="modalWinnerTitle" value="${escapeHtml(modal.winner?.title_text || 'Royal Victory')}">
+                        </div>
+                        <div class="text-input-row">
+                            <label>Loser Badge Text</label>
+                            <input type="text" id="modalLoserBadge" value="${escapeHtml(modal.loser?.badge_text || 'TRY AGAIN')}">
+                        </div>
+                        <div class="text-input-row">
+                            <label>Loser Title Text</label>
+                            <input type="text" id="modalLoserTitle" value="${escapeHtml(modal.loser?.title_text || 'Noble Effort')}">
+                        </div>
+                    </div>
+                    <div class="slider-row" style="margin-top: 15px;">
+                        <label>Modal Delay (ms) <span class="slider-value" id="modalDelayValue">${modal.delay_ms || 4500}</span></label>
+                        <input type="range" id="modalDelay" value="${modal.delay_ms || 4500}" min="1000" max="10000" step="500" oninput="document.getElementById('modalDelayValue').textContent = this.value">
+                    </div>
+                    <div class="slider-row">
+                        <label>Auto Close (ms) <span class="slider-value" id="modalAutoCloseValue">${modal.auto_close_ms || 6000}</span></label>
+                        <input type="range" id="modalAutoClose" value="${modal.auto_close_ms || 6000}" min="2000" max="15000" step="500" oninput="document.getElementById('modalAutoCloseValue').textContent = this.value">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced -->
+            <div class="customization-section collapsed">
+                <div class="customization-section-title" onclick="toggleSection(this)">Advanced Settings</div>
+                <div class="customization-section-content">
+                    <div class="text-input-row">
+                        <label>Custom CSS</label>
+                        <textarea id="advancedCustomCss" placeholder="/* Add custom CSS styles here */">${escapeHtml(advanced.custom_css || '')}</textarea>
+                    </div>
+                    <div class="text-input-row">
+                        <label>Custom JavaScript</label>
+                        <textarea id="advancedCustomJs" placeholder="// Add custom JavaScript here">${escapeHtml(advanced.custom_js || '')}</textarea>
+                    </div>
+                    <div class="toggle-row">
+                        <span class="toggle-label">Enable Keyboard Controls</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="accessibilityKeyboard" ${c.accessibility?.keyboard_controls !== false ? 'checked' : ''}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="btn btn-success" onclick="saveCustomization()">Save Changes</button>
+                <button class="btn btn-warning" onclick="resetCustomization()">Reset to Default</button>
+                <a href="${BASE_PATH}/api/customization/export" class="btn btn-info" download>Export Config</a>
+                <button class="btn btn-primary" onclick="document.getElementById('importFile').click()">Import Config</button>
+                <input type="file" id="importFile" style="display: none;" accept=".json" onchange="importCustomization(this)">
+            </div>
+        `;
+    }
+
+    function renderColorInput(label, id, value) {
+        // Handle rgba values by extracting hex or using fallback
+        let hexValue = value;
+        if (value && value.startsWith('rgba')) {
+            hexValue = '#ffffff';
+        }
+        return `
+            <div class="color-input-group">
+                <label>${label}</label>
+                <input type="color" id="${id}" value="${hexValue}" onchange="document.getElementById('${id}Text').value = this.value">
+                <input type="text" id="${id}Text" value="${value}" onchange="updateColorFromText('${id}', this.value)">
+            </div>
+        `;
+    }
+
+    function updateColorFromText(id, value) {
+        const colorInput = document.getElementById(id);
+        if (value && value.match(/^#[0-9A-Fa-f]{6}$/)) {
+            colorInput.value = value;
+        }
+    }
+
+    function toggleSection(titleEl) {
+        titleEl.parentElement.classList.toggle('collapsed');
+    }
+
+    async function applyPreset(presetId) {
+        try {
+            const response = await fetch(BASE_PATH + '/api/customization/apply-preset', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ preset_id: presetId })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                currentCustomization = data.customization;
+                renderCustomization();
+                showNotification('Theme preset applied! Reload the display page to see changes.');
+            } else {
+                showNotification(data.error || 'Failed to apply preset', 'error');
+            }
+        } catch (error) {
+            showNotification('Failed to apply preset', 'error');
+        }
+    }
+
+    async function saveCustomization() {
+        const updates = {
+            branding: {
+                title: document.getElementById('brandingTitle').value,
+                subtitle: document.getElementById('brandingSubtitle').value,
+                logo_url: document.getElementById('brandingLogo').value,
+                badge_text: document.getElementById('brandingBadge').value,
+                show_branding_badge: document.getElementById('brandingShowBadge').checked
+            },
+            theme: {
+                colors: {
+                    primary: document.getElementById('colorPrimaryText').value,
+                    secondary: document.getElementById('colorSecondaryText').value,
+                    accent: document.getElementById('colorAccentText').value,
+                    background: document.getElementById('colorBackgroundText').value,
+                    background_secondary: document.getElementById('colorBackgroundSecondaryText').value,
+                    text_primary: document.getElementById('colorTextPrimaryText').value,
+                    success: document.getElementById('colorSuccessText').value,
+                    error: document.getElementById('colorErrorText').value
+                }
+            },
+            wheel: {
+                size: {
+                    size_vmin: parseInt(document.getElementById('wheelSize').value),
+                    max_size_px: parseInt(document.getElementById('wheelMaxSize').value)
+                },
+                bezel: { enabled: document.getElementById('wheelBezelEnabled').checked },
+                studs: {
+                    enabled: document.getElementById('wheelStudsEnabled').checked,
+                    count: parseInt(document.getElementById('studCount').value)
+                },
+                pointer: { color: document.getElementById('wheelPointerColorText').value },
+                center: { icon_color: document.getElementById('wheelCenterIconColorText').value },
+                animation: { float_enabled: document.getElementById('wheelFloatEnabled').checked }
+            },
+            effects: {
+                confetti: {
+                    enabled: document.getElementById('effectsConfetti').checked,
+                    winner_count: parseInt(document.getElementById('confettiWinnerCount').value),
+                    loser_count: parseInt(document.getElementById('confettiLoserCount').value)
+                },
+                winner_flash: { enabled: document.getElementById('effectsWinnerFlash').checked },
+                background_shimmer: { enabled: document.getElementById('effectsBackgroundShimmer').checked }
+            },
+            modal: {
+                delay_ms: parseInt(document.getElementById('modalDelay').value),
+                auto_close_ms: parseInt(document.getElementById('modalAutoClose').value),
+                winner: {
+                    badge_text: document.getElementById('modalWinnerBadge').value,
+                    title_text: document.getElementById('modalWinnerTitle').value
+                },
+                loser: {
+                    badge_text: document.getElementById('modalLoserBadge').value,
+                    title_text: document.getElementById('modalLoserTitle').value
+                }
+            },
+            accessibility: {
+                keyboard_controls: document.getElementById('accessibilityKeyboard').checked
+            },
+            advanced: {
+                custom_css: document.getElementById('advancedCustomCss').value,
+                custom_js: document.getElementById('advancedCustomJs').value
+            }
+        };
+
+        try {
+            const response = await fetch(BASE_PATH + '/api/customization', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updates)
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                currentCustomization = data.customization;
+                showNotification('Customization saved! Reload the display page to see changes.');
+            } else {
+                showNotification(data.error || 'Failed to save', 'error');
+            }
+        } catch (error) {
+            showNotification('Failed to save customization', 'error');
+        }
+    }
+
+    async function resetCustomization() {
+        if (!confirm('Are you sure you want to reset all customization to defaults?')) return;
+
+        try {
+            const response = await fetch(BASE_PATH + '/api/customization/reset', { method: 'POST' });
+            const data = await response.json();
+
+            if (data.success) {
+                currentCustomization = data.customization;
+                renderCustomization();
+                showNotification('Customization reset to defaults!');
+            } else {
+                showNotification(data.error || 'Failed to reset', 'error');
+            }
+        } catch (error) {
+            showNotification('Failed to reset customization', 'error');
+        }
+    }
+
+    async function importCustomization(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        try {
+            const text = await file.text();
+            const config = JSON.parse(text);
+
+            const response = await fetch(BASE_PATH + '/api/customization/import', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(config)
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                currentCustomization = data.customization;
+                renderCustomization();
+                showNotification('Configuration imported successfully!');
+            } else {
+                showNotification(data.error || 'Failed to import', 'error');
+            }
+        } catch (error) {
+            showNotification('Invalid configuration file', 'error');
+        }
+
+        input.value = '';
+    }
+
     // Initialization - Polling-based updates instead of WebSocket
     document.addEventListener('DOMContentLoaded', () => {
         console.log('Dashboard (Web Only) initialized');
         loadDashboardData();
+        loadCustomizationData();
 
         // Poll for updates every 10 seconds
         setInterval(loadDashboardData, 10000);

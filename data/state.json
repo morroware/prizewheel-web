@@ -1,0 +1,6 @@
+{
+    "is_spinning": false,
+    "last_spin_time": 0,
+    "current_winner": null,
+    "spin_id": null
+}

@@ -28,6 +28,8 @@ define('CONFIG_FILE', DATA_DIR . 'config.json');
 define('PRIZES_FILE', DATA_DIR . 'prizes.json');
 define('HISTORY_FILE', DATA_DIR . 'history.json');
 define('STATE_FILE', DATA_DIR . 'state.json');
+define('CUSTOMIZATION_FILE', DATA_DIR . 'customization.json');
+define('PRESETS_DIR', DATA_DIR . 'presets/');
 
 // Ensure data directory exists
 if (!is_dir(DATA_DIR)) {
@@ -82,6 +84,122 @@ $DEFAULT_PRIZES = [
         'enabled' => true
     ]
 ];
+
+// Default customization
+$DEFAULT_CUSTOMIZATION = [
+    'meta' => [
+        'version' => '1.0.0',
+        'name' => 'Default Theme',
+        'description' => 'Default prize wheel theme'
+    ],
+    'branding' => [
+        'title' => 'Prize Wheel',
+        'subtitle' => '',
+        'logo_url' => '',
+        'favicon_url' => '',
+        'show_branding_badge' => true,
+        'badge_text' => 'Prize Wheel'
+    ],
+    'theme' => [
+        'preset' => 'royal',
+        'colors' => [
+            'primary' => '#FFD700',
+            'secondary' => '#6B46C1',
+            'accent' => '#FFA500',
+            'background' => '#0a0a14',
+            'background_secondary' => '#1a1a2e',
+            'text_primary' => '#ffffff',
+            'text_secondary' => 'rgba(255,255,255,0.7)',
+            'success' => '#4caf50',
+            'error' => '#f44336',
+            'warning' => '#ff9800'
+        ],
+        'gradients' => [
+            'background' => 'linear-gradient(135deg, #0a0a14 0%, #1a1a2e 35%, #16213e 70%, #0a0a14 100%)',
+            'overlay_top_left' => 'radial-gradient(ellipse at top left, rgba(107,70,193,0.15) 0%, transparent 50%)',
+            'overlay_top_right' => 'radial-gradient(ellipse at top right, rgba(30,58,138,0.15) 0%, transparent 50%)',
+            'overlay_bottom' => 'radial-gradient(ellipse at bottom, rgba(255,215,0,0.08) 0%, transparent 40%)'
+        ],
+        'fonts' => [
+            'heading' => "'Cinzel', serif",
+            'body' => "'Montserrat', sans-serif",
+            'google_fonts_url' => 'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Montserrat:wght@400;600;800&display=swap'
+        ]
+    ],
+    'wheel' => [
+        'size' => ['max_size_px' => 900, 'size_vmin' => 85, 'mobile_size_vmin' => 92],
+        'segments' => ['border_width' => 3, 'border_color' => 'rgba(0,0,0,0.4)', 'gradient_enabled' => true],
+        'text' => ['font_family' => "'Cinzel', serif", 'font_weight' => '900', 'color' => '#ffffff'],
+        'center' => ['icon' => '\u2654', 'icon_color' => '#FFD700'],
+        'bezel' => ['enabled' => true, 'colors' => ['#FFD700', '#FFA500', '#CD7F32', '#FF8C00']],
+        'studs' => ['enabled' => true, 'count' => 32, 'colors' => ['#FFD700', '#FFA500', '#CD7F32']],
+        'pointer' => ['color' => '#FFD700', 'glow_color' => 'rgba(255,215,0,0.8)'],
+        'animation' => ['float_enabled' => true]
+    ],
+    'effects' => [
+        'confetti' => [
+            'enabled' => true,
+            'winner_colors' => ['#FFD700', '#FFA500', '#FF69B4', '#00CED1', '#9370DB', '#FF6347', '#32CD32'],
+            'loser_colors' => ['#C0C0C0', '#A8A8A8', '#D3D3D3', '#B8860B']
+        ],
+        'winner_flash' => ['enabled' => true, 'duration_ms' => 4000]
+    ],
+    'modal' => [
+        'delay_ms' => 4500,
+        'auto_close_ms' => 6000,
+        'winner' => ['crest_icon' => '&#127942;', 'badge_text' => 'WINNER', 'title_text' => 'Royal Victory'],
+        'loser' => ['crest_icon' => '&#128737;', 'badge_text' => 'TRY AGAIN', 'title_text' => 'Noble Effort']
+    ],
+    'sounds' => [
+        'enabled' => true,
+        'master_volume' => 75
+    ],
+    'status_indicator' => ['enabled' => true],
+    'accessibility' => ['keyboard_controls' => true],
+    'advanced' => ['custom_css' => '', 'custom_js' => '']
+];
+
+/**
+ * Get customization settings
+ */
+function getCustomization() {
+    global $DEFAULT_CUSTOMIZATION;
+    $customization = loadJsonFile(CUSTOMIZATION_FILE, $DEFAULT_CUSTOMIZATION);
+    return array_replace_recursive($DEFAULT_CUSTOMIZATION, $customization);
+}
+
+/**
+ * Save customization settings
+ */
+function saveCustomization($customization) {
+    return saveJsonFile(CUSTOMIZATION_FILE, $customization);
+}
+
+/**
+ * Get available theme presets
+ */
+function getThemePresets() {
+    $presetsFile = PRESETS_DIR . 'themes.json';
+    if (file_exists($presetsFile)) {
+        $data = json_decode(file_get_contents($presetsFile), true);
+        return $data['presets'] ?? [];
+    }
+    return [];
+}
+
+/**
+ * Deep merge arrays recursively
+ */
+function arrayMergeDeep($base, $overlay) {
+    foreach ($overlay as $key => $value) {
+        if (is_array($value) && isset($base[$key]) && is_array($base[$key])) {
+            $base[$key] = arrayMergeDeep($base[$key], $value);
+        } else {
+            $base[$key] = $value;
+        }
+    }
+    return $base;
+}
 
 /**
  * Load JSON file with fallback to default
@@ -476,6 +594,22 @@ if (strpos($path, '/api/') === 0) {
         ]);
     }
 
+    // POST /api/state/reset - Force reset wheel state (for stuck wheels)
+    if ($path === '/api/state/reset' && $requestMethod === 'POST') {
+        $state = [
+            'is_spinning' => false,
+            'last_spin_time' => 0,
+            'current_winner' => null,
+            'spin_id' => null
+        ];
+        saveWheelState($state);
+
+        jsonResponse([
+            'success' => true,
+            'message' => 'Wheel state has been reset'
+        ]);
+    }
+
     // GET /api/config - Get configuration
     if ($path === '/api/config' && $requestMethod === 'GET') {
         $config = getConfig();
@@ -645,6 +779,172 @@ if (strpos($path, '/api/') === 0) {
             'win_rate' => ($totalWinners / $simulations) * 100,
             'results' => $resultArray
         ]);
+    }
+
+    // GET /api/customization - Get customization settings
+    if ($path === '/api/customization' && $requestMethod === 'GET') {
+        $customization = getCustomization();
+        jsonResponse(['success' => true, 'customization' => $customization]);
+    }
+
+    // POST /api/customization - Save customization settings
+    if ($path === '/api/customization' && $requestMethod === 'POST') {
+        $input = json_decode(file_get_contents('php://input'), true);
+        if (!$input) {
+            jsonResponse(['success' => false, 'error' => 'Invalid JSON data'], 400);
+        }
+
+        $customization = getCustomization();
+        $customization = arrayMergeDeep($customization, $input);
+
+        if (saveCustomization($customization)) {
+            jsonResponse(['success' => true, 'customization' => $customization]);
+        } else {
+            jsonResponse(['success' => false, 'error' => 'Failed to save customization'], 500);
+        }
+    }
+
+    // GET /api/presets/themes - Get available theme presets
+    if ($path === '/api/presets/themes' && $requestMethod === 'GET') {
+        $presets = getThemePresets();
+        jsonResponse(['success' => true, 'presets' => $presets]);
+    }
+
+    // POST /api/customization/apply-preset - Apply a theme preset
+    if ($path === '/api/customization/apply-preset' && $requestMethod === 'POST') {
+        $input = json_decode(file_get_contents('php://input'), true);
+        $presetId = $input['preset_id'] ?? null;
+
+        if (!$presetId) {
+            jsonResponse(['success' => false, 'error' => 'No preset_id provided'], 400);
+        }
+
+        $presets = getThemePresets();
+        $selectedPreset = null;
+
+        foreach ($presets as $preset) {
+            if ($preset['id'] === $presetId) {
+                $selectedPreset = $preset;
+                break;
+            }
+        }
+
+        if (!$selectedPreset) {
+            jsonResponse(['success' => false, 'error' => 'Preset not found'], 404);
+        }
+
+        $customization = getCustomization();
+
+        // Apply preset theme settings
+        if (isset($selectedPreset['theme'])) {
+            $customization['theme'] = arrayMergeDeep($customization['theme'], $selectedPreset['theme']);
+        }
+        if (isset($selectedPreset['wheel'])) {
+            $customization['wheel'] = arrayMergeDeep($customization['wheel'], $selectedPreset['wheel']);
+        }
+        if (isset($selectedPreset['effects'])) {
+            $customization['effects'] = arrayMergeDeep($customization['effects'], $selectedPreset['effects']);
+        }
+        if (isset($selectedPreset['modal'])) {
+            $customization['modal'] = arrayMergeDeep($customization['modal'], $selectedPreset['modal']);
+        }
+
+        $customization['theme']['preset'] = $presetId;
+        $customization['meta']['name'] = $selectedPreset['name'];
+        $customization['meta']['description'] = $selectedPreset['description'];
+
+        if (saveCustomization($customization)) {
+            jsonResponse(['success' => true, 'customization' => $customization, 'preset' => $selectedPreset]);
+        } else {
+            jsonResponse(['success' => false, 'error' => 'Failed to apply preset'], 500);
+        }
+    }
+
+    // POST /api/customization/reset - Reset to defaults
+    if ($path === '/api/customization/reset' && $requestMethod === 'POST') {
+        global $DEFAULT_CUSTOMIZATION;
+        if (saveCustomization($DEFAULT_CUSTOMIZATION)) {
+            jsonResponse(['success' => true, 'customization' => $DEFAULT_CUSTOMIZATION]);
+        } else {
+            jsonResponse(['success' => false, 'error' => 'Failed to reset customization'], 500);
+        }
+    }
+
+    // POST /api/customization/export - Export customization as JSON
+    if ($path === '/api/customization/export' && $requestMethod === 'GET') {
+        $customization = getCustomization();
+        header('Content-Type: application/json');
+        header('Content-Disposition: attachment; filename="wheel-customization.json"');
+        echo json_encode($customization, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
+
+    // POST /api/customization/import - Import customization from JSON
+    if ($path === '/api/customization/import' && $requestMethod === 'POST') {
+        $input = json_decode(file_get_contents('php://input'), true);
+        if (!$input || !is_array($input)) {
+            jsonResponse(['success' => false, 'error' => 'Invalid customization data'], 400);
+        }
+
+        // Validate basic structure
+        if (!isset($input['meta']) || !isset($input['theme'])) {
+            jsonResponse(['success' => false, 'error' => 'Invalid customization format - missing required fields'], 400);
+        }
+
+        if (saveCustomization($input)) {
+            jsonResponse(['success' => true, 'customization' => $input]);
+        } else {
+            jsonResponse(['success' => false, 'error' => 'Failed to import customization'], 500);
+        }
+    }
+
+    // POST /api/upload/image - Upload an image (logo, background, etc.)
+    if ($path === '/api/upload/image' && $requestMethod === 'POST') {
+        if (!isset($_FILES['file'])) {
+            jsonResponse(['success' => false, 'error' => 'No file uploaded'], 400);
+        }
+
+        $file = $_FILES['file'];
+        $allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/svg+xml', 'image/webp'];
+
+        if (!in_array($file['type'], $allowedTypes)) {
+            jsonResponse(['success' => false, 'error' => 'Invalid file type. Allowed: PNG, JPEG, GIF, SVG, WebP'], 400);
+        }
+
+        if ($file['size'] > 5 * 1024 * 1024) {
+            jsonResponse(['success' => false, 'error' => 'File too large (max 5MB)'], 400);
+        }
+
+        $imagesDir = STATIC_DIR . 'images/';
+        if (!is_dir($imagesDir)) {
+            mkdir($imagesDir, 0755, true);
+        }
+
+        $filename = preg_replace('/[^a-zA-Z0-9._-]/', '', basename($file['name']));
+        $destination = $imagesDir . $filename;
+
+        if (move_uploaded_file($file['tmp_name'], $destination)) {
+            jsonResponse(['success' => true, 'path' => BASE_PATH . '/static/images/' . $filename]);
+        } else {
+            jsonResponse(['success' => false, 'error' => 'Failed to save file'], 500);
+        }
+    }
+
+    // GET /api/images/list - List available images
+    if ($path === '/api/images/list' && $requestMethod === 'GET') {
+        $imagesDir = STATIC_DIR . 'images/';
+        $images = [];
+
+        if (is_dir($imagesDir)) {
+            $files = scandir($imagesDir);
+            foreach ($files as $file) {
+                if (preg_match('/\.(png|jpg|jpeg|gif|svg|webp)$/i', $file)) {
+                    $images[] = BASE_PATH . '/static/images/' . $file;
+                }
+            }
+        }
+
+        jsonResponse(['success' => true, 'images' => $images]);
     }
 
     // API endpoint not found

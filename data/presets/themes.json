@@ -1,0 +1,411 @@
+{
+  "presets": [
+    {
+      "id": "royal",
+      "name": "Royal Kingdom",
+      "description": "Elegant gold and purple with medieval flair",
+      "preview_colors": ["#FFD700", "#6B46C1", "#0a0a14"],
+      "theme": {
+        "colors": {
+          "primary": "#FFD700",
+          "secondary": "#6B46C1",
+          "accent": "#FFA500",
+          "background": "#0a0a14",
+          "background_secondary": "#1a1a2e",
+          "text_primary": "#ffffff",
+          "text_secondary": "rgba(255,255,255,0.7)"
+        },
+        "gradients": {
+          "background": "linear-gradient(135deg, #0a0a14 0%, #1a1a2e 35%, #16213e 70%, #0a0a14 100%)",
+          "overlay_top_left": "radial-gradient(ellipse at top left, rgba(107,70,193,0.15) 0%, transparent 50%)",
+          "overlay_top_right": "radial-gradient(ellipse at top right, rgba(30,58,138,0.15) 0%, transparent 50%)",
+          "overlay_bottom": "radial-gradient(ellipse at bottom, rgba(255,215,0,0.08) 0%, transparent 40%)"
+        }
+      },
+      "wheel": {
+        "bezel": { "colors": ["#FFD700", "#FFA500", "#CD7F32", "#FF8C00"] },
+        "studs": { "colors": ["#FFD700", "#FFA500", "#CD7F32"] },
+        "pointer": { "color": "#FFD700", "glow_color": "rgba(255,215,0,0.8)" },
+        "center": { "icon": "\u2654", "icon_color": "#FFD700", "border_color_outer": "#FFB300", "border_color_inner": "#FFD700" }
+      },
+      "modal": {
+        "winner": {
+          "border_gradient": ["#FFD700", "#FFA500", "#CD7F32"],
+          "crest_icon": "&#127942;",
+          "badge_text": "WINNER",
+          "title_text": "Royal Victory"
+        },
+        "loser": {
+          "border_gradient": ["#C0C0C0", "#A8A8A8", "#CD7F32"],
+          "crest_icon": "&#128737;",
+          "badge_text": "TRY AGAIN",
+          "title_text": "Noble Effort"
+        }
+      }
+    },
+    {
+      "id": "neon",
+      "name": "Neon Nights",
+      "description": "Vibrant cyberpunk colors with electric glow",
+      "preview_colors": ["#00ffff", "#ff00ff", "#0a0a0a"],
+      "theme": {
+        "colors": {
+          "primary": "#00ffff",
+          "secondary": "#ff00ff",
+          "accent": "#ffff00",
+          "background": "#0a0a0a",
+          "background_secondary": "#1a0a1a",
+          "text_primary": "#ffffff",
+          "text_secondary": "rgba(255,255,255,0.7)"
+        },
+        "gradients": {
+          "background": "linear-gradient(135deg, #0a0a0a 0%, #1a0a2a 35%, #0a1a2a 70%, #0a0a0a 100%)",
+          "overlay_top_left": "radial-gradient(ellipse at top left, rgba(255,0,255,0.2) 0%, transparent 50%)",
+          "overlay_top_right": "radial-gradient(ellipse at top right, rgba(0,255,255,0.2) 0%, transparent 50%)",
+          "overlay_bottom": "radial-gradient(ellipse at bottom, rgba(255,255,0,0.1) 0%, transparent 40%)"
+        }
+      },
+      "wheel": {
+        "bezel": { "colors": ["#00ffff", "#ff00ff", "#ffff00", "#00ff00"], "glow_color": "rgba(0,255,255,0.5)" },
+        "studs": { "colors": ["#00ffff", "#ff00ff", "#ffff00"] },
+        "pointer": { "color": "#00ffff", "glow_color": "rgba(0,255,255,0.9)" },
+        "center": { "icon": "\u26a1", "icon_color": "#00ffff", "border_color_outer": "#ff00ff", "border_color_inner": "#00ffff" }
+      },
+      "effects": {
+        "confetti": {
+          "winner_colors": ["#00ffff", "#ff00ff", "#ffff00", "#00ff00", "#ff6600", "#ff0066"],
+          "loser_colors": ["#666666", "#888888", "#444444"]
+        }
+      },
+      "modal": {
+        "card": { "background": "linear-gradient(135deg, rgba(10,10,30,0.98), rgba(30,10,40,0.98))" },
+        "winner": {
+          "border_gradient": ["#00ffff", "#ff00ff", "#ffff00"],
+          "crest_icon": "&#9889;",
+          "crest_colors": ["#00ffff", "#ff00ff", "#ffff00"],
+          "badge_text": "JACKPOT!",
+          "badge_background": "linear-gradient(135deg, #00ffff, #ff00ff)",
+          "title_text": "Electric Win!"
+        },
+        "loser": {
+          "border_gradient": ["#666666", "#888888", "#444444"],
+          "crest_icon": "&#128268;",
+          "badge_text": "RETRY",
+          "title_text": "Power Up Again"
+        }
+      }
+    },
+    {
+      "id": "casino",
+      "name": "Vegas Casino",
+      "description": "Classic casino red and gold luxury",
+      "preview_colors": ["#c9a227", "#8b0000", "#1a0a0a"],
+      "theme": {
+        "colors": {
+          "primary": "#c9a227",
+          "secondary": "#8b0000",
+          "accent": "#ff4444",
+          "background": "#1a0a0a",
+          "background_secondary": "#2a1515",
+          "text_primary": "#ffffff",
+          "text_secondary": "rgba(255,255,255,0.8)"
+        },
+        "gradients": {
+          "background": "linear-gradient(135deg, #1a0a0a 0%, #2a1010 35%, #1a0a0a 70%, #0f0505 100%)",
+          "overlay_top_left": "radial-gradient(ellipse at top left, rgba(201,162,39,0.15) 0%, transparent 50%)",
+          "overlay_top_right": "radial-gradient(ellipse at top right, rgba(139,0,0,0.2) 0%, transparent 50%)",
+          "overlay_bottom": "radial-gradient(ellipse at bottom, rgba(201,162,39,0.1) 0%, transparent 40%)"
+        }
+      },
+      "wheel": {
+        "bezel": { "colors": ["#c9a227", "#8b6914", "#654321", "#c9a227"], "glow_color": "rgba(201,162,39,0.4)" },
+        "studs": { "colors": ["#c9a227", "#8b6914", "#654321"] },
+        "pointer": { "color": "#c9a227", "glow_color": "rgba(201,162,39,0.8)" },
+        "center": { "icon": "\u2666", "icon_color": "#c9a227", "border_color_outer": "#8b6914", "border_color_inner": "#c9a227" }
+      },
+      "effects": {
+        "confetti": {
+          "winner_colors": ["#c9a227", "#ff4444", "#ffffff", "#8b0000", "#ffd700"],
+          "loser_colors": ["#8b6914", "#654321", "#4a3520"]
+        }
+      },
+      "modal": {
+        "card": { "background": "linear-gradient(135deg, rgba(42,20,20,0.98), rgba(26,10,10,0.98))" },
+        "winner": {
+          "border_gradient": ["#c9a227", "#8b6914", "#654321"],
+          "crest_icon": "&#127183;",
+          "crest_colors": ["#c9a227", "#8b6914", "#654321"],
+          "badge_text": "JACKPOT!",
+          "badge_background": "linear-gradient(135deg, #c9a227, #8b6914)",
+          "title_text": "Big Winner!"
+        },
+        "loser": {
+          "border_gradient": ["#654321", "#4a3520", "#3a2510"],
+          "crest_icon": "&#127922;",
+          "badge_text": "TRY AGAIN",
+          "title_text": "Roll Again"
+        }
+      }
+    },
+    {
+      "id": "ocean",
+      "name": "Ocean Breeze",
+      "description": "Calming blues and teals with wave effects",
+      "preview_colors": ["#00d4ff", "#0077b6", "#03045e"],
+      "theme": {
+        "colors": {
+          "primary": "#00d4ff",
+          "secondary": "#0077b6",
+          "accent": "#48cae4",
+          "background": "#03045e",
+          "background_secondary": "#023e8a",
+          "text_primary": "#ffffff",
+          "text_secondary": "rgba(255,255,255,0.8)"
+        },
+        "gradients": {
+          "background": "linear-gradient(135deg, #03045e 0%, #023e8a 35%, #0077b6 70%, #03045e 100%)",
+          "overlay_top_left": "radial-gradient(ellipse at top left, rgba(0,212,255,0.15) 0%, transparent 50%)",
+          "overlay_top_right": "radial-gradient(ellipse at top right, rgba(72,202,228,0.15) 0%, transparent 50%)",
+          "overlay_bottom": "radial-gradient(ellipse at bottom, rgba(144,224,239,0.1) 0%, transparent 40%)"
+        }
+      },
+      "wheel": {
+        "bezel": { "colors": ["#00d4ff", "#48cae4", "#0077b6", "#00d4ff"], "glow_color": "rgba(0,212,255,0.5)" },
+        "studs": { "colors": ["#00d4ff", "#48cae4", "#90e0ef"] },
+        "pointer": { "color": "#00d4ff", "glow_color": "rgba(0,212,255,0.8)" },
+        "center": { "icon": "\u2693", "icon_color": "#00d4ff", "border_color_outer": "#0077b6", "border_color_inner": "#00d4ff" }
+      },
+      "effects": {
+        "confetti": {
+          "winner_colors": ["#00d4ff", "#48cae4", "#90e0ef", "#caf0f8", "#ffffff"],
+          "loser_colors": ["#0077b6", "#023e8a", "#03045e"]
+        }
+      },
+      "modal": {
+        "card": { "background": "linear-gradient(135deg, rgba(2,62,138,0.98), rgba(3,4,94,0.98))" },
+        "winner": {
+          "border_gradient": ["#00d4ff", "#48cae4", "#90e0ef"],
+          "crest_icon": "&#127754;",
+          "crest_colors": ["#00d4ff", "#48cae4", "#90e0ef"],
+          "badge_text": "WINNER!",
+          "badge_background": "linear-gradient(135deg, #00d4ff, #48cae4)",
+          "title_text": "Tidal Win!"
+        },
+        "loser": {
+          "border_gradient": ["#0077b6", "#023e8a", "#03045e"],
+          "crest_icon": "&#127754;",
+          "badge_text": "TRY AGAIN",
+          "title_text": "Catch the Wave"
+        }
+      }
+    },
+    {
+      "id": "forest",
+      "name": "Enchanted Forest",
+      "description": "Natural greens and earth tones",
+      "preview_colors": ["#90be6d", "#43aa8b", "#1b4332"],
+      "theme": {
+        "colors": {
+          "primary": "#90be6d",
+          "secondary": "#43aa8b",
+          "accent": "#f9c74f",
+          "background": "#1b4332",
+          "background_secondary": "#2d6a4f",
+          "text_primary": "#ffffff",
+          "text_secondary": "rgba(255,255,255,0.8)"
+        },
+        "gradients": {
+          "background": "linear-gradient(135deg, #1b4332 0%, #2d6a4f 35%, #40916c 70%, #1b4332 100%)",
+          "overlay_top_left": "radial-gradient(ellipse at top left, rgba(144,190,109,0.15) 0%, transparent 50%)",
+          "overlay_top_right": "radial-gradient(ellipse at top right, rgba(67,170,139,0.15) 0%, transparent 50%)",
+          "overlay_bottom": "radial-gradient(ellipse at bottom, rgba(249,199,79,0.1) 0%, transparent 40%)"
+        }
+      },
+      "wheel": {
+        "bezel": { "colors": ["#90be6d", "#52b788", "#40916c", "#90be6d"], "glow_color": "rgba(144,190,109,0.4)" },
+        "studs": { "colors": ["#90be6d", "#52b788", "#f9c74f"] },
+        "pointer": { "color": "#f9c74f", "glow_color": "rgba(249,199,79,0.8)" },
+        "center": { "icon": "\u2618", "icon_color": "#90be6d", "border_color_outer": "#52b788", "border_color_inner": "#90be6d" }
+      },
+      "effects": {
+        "confetti": {
+          "winner_colors": ["#90be6d", "#52b788", "#f9c74f", "#2d6a4f", "#40916c"],
+          "loser_colors": ["#40916c", "#2d6a4f", "#1b4332"]
+        }
+      },
+      "modal": {
+        "card": { "background": "linear-gradient(135deg, rgba(45,106,79,0.98), rgba(27,67,50,0.98))" },
+        "winner": {
+          "border_gradient": ["#90be6d", "#52b788", "#f9c74f"],
+          "crest_icon": "&#127807;",
+          "crest_colors": ["#90be6d", "#52b788", "#f9c74f"],
+          "badge_text": "WINNER!",
+          "badge_background": "linear-gradient(135deg, #90be6d, #52b788)",
+          "title_text": "Nature's Gift!"
+        },
+        "loser": {
+          "border_gradient": ["#40916c", "#2d6a4f", "#1b4332"],
+          "crest_icon": "&#127811;",
+          "badge_text": "TRY AGAIN",
+          "title_text": "Grow Stronger"
+        }
+      }
+    },
+    {
+      "id": "midnight",
+      "name": "Midnight Dark",
+      "description": "Sleek dark mode with subtle accents",
+      "preview_colors": ["#e0e0e0", "#757575", "#121212"],
+      "theme": {
+        "colors": {
+          "primary": "#e0e0e0",
+          "secondary": "#757575",
+          "accent": "#bb86fc",
+          "background": "#121212",
+          "background_secondary": "#1e1e1e",
+          "text_primary": "#ffffff",
+          "text_secondary": "rgba(255,255,255,0.6)"
+        },
+        "gradients": {
+          "background": "linear-gradient(135deg, #121212 0%, #1e1e1e 35%, #252525 70%, #121212 100%)",
+          "overlay_top_left": "radial-gradient(ellipse at top left, rgba(187,134,252,0.08) 0%, transparent 50%)",
+          "overlay_top_right": "radial-gradient(ellipse at top right, rgba(3,218,198,0.08) 0%, transparent 50%)",
+          "overlay_bottom": "radial-gradient(ellipse at bottom, rgba(224,224,224,0.05) 0%, transparent 40%)"
+        }
+      },
+      "wheel": {
+        "bezel": { "colors": ["#e0e0e0", "#9e9e9e", "#757575", "#e0e0e0"], "glow_color": "rgba(224,224,224,0.3)" },
+        "studs": { "colors": ["#e0e0e0", "#9e9e9e", "#757575"] },
+        "pointer": { "color": "#e0e0e0", "glow_color": "rgba(224,224,224,0.6)" },
+        "center": { "icon": "\u2605", "icon_color": "#e0e0e0", "border_color_outer": "#757575", "border_color_inner": "#e0e0e0" }
+      },
+      "effects": {
+        "confetti": {
+          "winner_colors": ["#bb86fc", "#03dac6", "#e0e0e0", "#cf6679", "#ffffff"],
+          "loser_colors": ["#757575", "#616161", "#424242"]
+        }
+      },
+      "modal": {
+        "card": { "background": "linear-gradient(135deg, rgba(30,30,30,0.98), rgba(18,18,18,0.98))" },
+        "winner": {
+          "border_gradient": ["#bb86fc", "#03dac6", "#e0e0e0"],
+          "crest_icon": "&#127775;",
+          "crest_colors": ["#bb86fc", "#03dac6", "#e0e0e0"],
+          "badge_text": "WINNER!",
+          "badge_background": "linear-gradient(135deg, #bb86fc, #03dac6)",
+          "title_text": "Stellar Win!"
+        },
+        "loser": {
+          "border_gradient": ["#757575", "#616161", "#424242"],
+          "crest_icon": "&#127761;",
+          "badge_text": "TRY AGAIN",
+          "title_text": "Next Time"
+        }
+      }
+    },
+    {
+      "id": "sunrise",
+      "name": "Warm Sunrise",
+      "description": "Warm oranges and soft reds",
+      "preview_colors": ["#ffbe0b", "#fb5607", "#390099"],
+      "theme": {
+        "colors": {
+          "primary": "#ffbe0b",
+          "secondary": "#fb5607",
+          "accent": "#ff006e",
+          "background": "#390099",
+          "background_secondary": "#5a189a",
+          "text_primary": "#ffffff",
+          "text_secondary": "rgba(255,255,255,0.8)"
+        },
+        "gradients": {
+          "background": "linear-gradient(135deg, #390099 0%, #5a189a 35%, #9d4edd 70%, #390099 100%)",
+          "overlay_top_left": "radial-gradient(ellipse at top left, rgba(255,190,11,0.2) 0%, transparent 50%)",
+          "overlay_top_right": "radial-gradient(ellipse at top right, rgba(251,86,7,0.2) 0%, transparent 50%)",
+          "overlay_bottom": "radial-gradient(ellipse at bottom, rgba(255,0,110,0.1) 0%, transparent 40%)"
+        }
+      },
+      "wheel": {
+        "bezel": { "colors": ["#ffbe0b", "#fb5607", "#ff006e", "#ffbe0b"], "glow_color": "rgba(255,190,11,0.5)" },
+        "studs": { "colors": ["#ffbe0b", "#fb5607", "#ff006e"] },
+        "pointer": { "color": "#ffbe0b", "glow_color": "rgba(255,190,11,0.8)" },
+        "center": { "icon": "\u2600", "icon_color": "#ffbe0b", "border_color_outer": "#fb5607", "border_color_inner": "#ffbe0b" }
+      },
+      "effects": {
+        "confetti": {
+          "winner_colors": ["#ffbe0b", "#fb5607", "#ff006e", "#8338ec", "#ffffff"],
+          "loser_colors": ["#9d4edd", "#7b2cbf", "#5a189a"]
+        }
+      },
+      "modal": {
+        "card": { "background": "linear-gradient(135deg, rgba(90,24,154,0.98), rgba(57,0,153,0.98))" },
+        "winner": {
+          "border_gradient": ["#ffbe0b", "#fb5607", "#ff006e"],
+          "crest_icon": "&#127773;",
+          "crest_colors": ["#ffbe0b", "#fb5607", "#ff006e"],
+          "badge_text": "WINNER!",
+          "badge_background": "linear-gradient(135deg, #ffbe0b, #fb5607)",
+          "title_text": "Radiant Win!"
+        },
+        "loser": {
+          "border_gradient": ["#9d4edd", "#7b2cbf", "#5a189a"],
+          "crest_icon": "&#127769;",
+          "badge_text": "TRY AGAIN",
+          "title_text": "Dawn Awaits"
+        }
+      }
+    },
+    {
+      "id": "minimal",
+      "name": "Clean Minimal",
+      "description": "Simple black and white elegance",
+      "preview_colors": ["#ffffff", "#333333", "#000000"],
+      "theme": {
+        "colors": {
+          "primary": "#ffffff",
+          "secondary": "#333333",
+          "accent": "#666666",
+          "background": "#000000",
+          "background_secondary": "#111111",
+          "text_primary": "#ffffff",
+          "text_secondary": "rgba(255,255,255,0.7)"
+        },
+        "gradients": {
+          "background": "linear-gradient(135deg, #000000 0%, #111111 50%, #000000 100%)",
+          "overlay_top_left": "radial-gradient(ellipse at top left, rgba(255,255,255,0.03) 0%, transparent 50%)",
+          "overlay_top_right": "radial-gradient(ellipse at top right, rgba(255,255,255,0.03) 0%, transparent 50%)",
+          "overlay_bottom": "radial-gradient(ellipse at bottom, rgba(255,255,255,0.02) 0%, transparent 40%)"
+        }
+      },
+      "wheel": {
+        "bezel": { "colors": ["#ffffff", "#cccccc", "#999999", "#ffffff"], "glow_color": "rgba(255,255,255,0.3)" },
+        "studs": { "colors": ["#ffffff", "#cccccc", "#999999"] },
+        "pointer": { "color": "#ffffff", "glow_color": "rgba(255,255,255,0.6)" },
+        "center": { "icon": "\u25cf", "icon_color": "#ffffff", "border_color_outer": "#666666", "border_color_inner": "#ffffff" }
+      },
+      "effects": {
+        "confetti": {
+          "winner_colors": ["#ffffff", "#e0e0e0", "#c0c0c0"],
+          "loser_colors": ["#666666", "#444444", "#333333"]
+        }
+      },
+      "modal": {
+        "card": { "background": "linear-gradient(135deg, rgba(17,17,17,0.98), rgba(0,0,0,0.98))" },
+        "winner": {
+          "border_gradient": ["#ffffff", "#cccccc", "#999999"],
+          "crest_icon": "&#10003;",
+          "crest_colors": ["#ffffff", "#cccccc", "#999999"],
+          "badge_text": "WIN",
+          "badge_background": "linear-gradient(135deg, #ffffff, #cccccc)",
+          "title_text": "You Won"
+        },
+        "loser": {
+          "border_gradient": ["#666666", "#444444", "#333333"],
+          "crest_icon": "&#10227;",
+          "badge_text": "RETRY",
+          "title_text": "Try Again"
+        }
+      }
+    }
+  ]
+}
