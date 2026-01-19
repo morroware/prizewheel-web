@@ -416,6 +416,11 @@
                 <a href="${BASE_PATH}/api/export/csv" class="btn btn-info" download>Download CSV</a>
             </div>
             <div class="form-group">
+                <label>Reset Wheel State</label>
+                <p style="opacity: 0.7; font-size: 14px; margin-bottom: 10px;">If the wheel is stuck in "spinning" or "cooldown" state, use this to force reset it.</p>
+                <button class="btn btn-warning" onclick="resetWheelState()">Force Reset Wheel</button>
+            </div>
+            <div class="form-group">
                 <label>Clear Spin History</label>
                 <p style="opacity: 0.7; font-size: 14px; margin-bottom: 10px;">This will permanently delete all spin records. This action cannot be undone.</p>
                 <button class="btn btn-danger" onclick="clearHistory()">Clear History</button>
@@ -557,6 +562,20 @@
             loadDashboardData();
         } else {
             showNotification('Failed to clear history.', 'error');
+        }
+    }
+
+    async function resetWheelState() {
+        try {
+            const response = await fetch(BASE_PATH + '/api/state/reset', { method: 'POST' });
+            const data = await response.json();
+            if (data.success) {
+                showNotification('Wheel state reset! Refresh the display page.');
+            } else {
+                showNotification(data.error || 'Failed to reset state.', 'error');
+            }
+        } catch (error) {
+            showNotification('Failed to reset wheel state.', 'error');
         }
     }
 

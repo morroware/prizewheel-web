@@ -594,6 +594,22 @@ if (strpos($path, '/api/') === 0) {
         ]);
     }
 
+    // POST /api/state/reset - Force reset wheel state (for stuck wheels)
+    if ($path === '/api/state/reset' && $requestMethod === 'POST') {
+        $state = [
+            'is_spinning' => false,
+            'last_spin_time' => 0,
+            'current_winner' => null,
+            'spin_id' => null
+        ];
+        saveWheelState($state);
+
+        jsonResponse([
+            'success' => true,
+            'message' => 'Wheel state has been reset'
+        ]);
+    }
+
     // GET /api/config - Get configuration
     if ($path === '/api/config' && $requestMethod === 'GET') {
         $config = getConfig();
