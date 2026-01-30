@@ -173,12 +173,12 @@ function createMenu() {
         {
           label: 'Admin Dashboard',
           accelerator: 'F2',
-          click: () => navigateTo('/?page=dashboard')
+          click: () => navigateTo('/dashboard')
         },
         {
           label: 'Odds Calculator',
           accelerator: 'F3',
-          click: () => navigateTo('/?page=odds')
+          click: () => navigateTo('/odds')
         },
         { type: 'separator' },
         {
@@ -240,10 +240,10 @@ function registerShortcuts() {
   globalShortcut.register('F1', () => navigateTo('/'));
 
   // F2 - Admin Dashboard
-  globalShortcut.register('F2', () => navigateTo('/?page=dashboard'));
+  globalShortcut.register('F2', () => navigateTo('/dashboard'));
 
   // F3 - Odds Calculator
-  globalShortcut.register('F3', () => navigateTo('/?page=odds'));
+  globalShortcut.register('F3', () => navigateTo('/odds'));
 
   // F11 - Toggle Fullscreen
   globalShortcut.register('F11', () => {
@@ -261,7 +261,7 @@ function registerShortcuts() {
 
   // Ctrl+Shift+D - Quick toggle to dashboard
   globalShortcut.register('CommandOrControl+Shift+D', () => {
-    navigateTo('/?page=dashboard');
+    navigateTo('/dashboard');
   });
 
   // Ctrl+Shift+W - Quick toggle to wheel
