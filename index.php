@@ -42,9 +42,10 @@ $DEFAULT_CONFIG = [
     'cooldown_seconds' => 3,
     'volume' => 75,
     'system_sounds' => [
-        'spin' => '/static/sounds/spin.mp3',
-        'winner' => '/static/sounds/victory.mp3',
-        'loser' => '/static/sounds/try-again.mp3'
+        'spin' => '/static/sounds/spin.wav',
+        'winner' => '/static/sounds/victory.wav',
+        'loser' => '/static/sounds/try-again.wav',
+        'tick' => '/static/sounds/tick.wav'
     ],
     'modal_delay_ms' => 4500,
     'modal_auto_close_ms' => 6000,
@@ -70,7 +71,7 @@ $DEFAULT_PRIZES = [
         'weight' => 0.1,
         'color' => '#00f531',
         'is_winner' => true,
-        'sound_path' => '/static/sounds/winning_fanfare1.mp3',
+        'sound_path' => '/static/sounds/victory.wav',
         'enabled' => true
     ],
     [
@@ -80,7 +81,7 @@ $DEFAULT_PRIZES = [
         'weight' => 15.0,
         'color' => '#607d8b',
         'is_winner' => false,
-        'sound_path' => '/static/sounds/Brass-fail4.mp3',
+        'sound_path' => '/static/sounds/try-again.wav',
         'enabled' => true
     ]
 ];
@@ -650,7 +651,7 @@ if (strpos($path, '/api/') === 0) {
         }
 
         $file = $_FILES['file'];
-        $allowedTypes = ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp4'];
+        $allowedTypes = ['audio/mpeg', 'audio/wav', 'audio/x-wav', 'audio/ogg', 'audio/mp4'];
 
         if (!in_array($file['type'], $allowedTypes)) {
             jsonResponse(['success' => false, 'error' => 'Invalid file type'], 400);

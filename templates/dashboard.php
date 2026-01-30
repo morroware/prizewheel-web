@@ -385,6 +385,16 @@
         const soundData = await soundResponse.json();
         const sounds = soundData.sounds || [];
 
+        // Fetch current customization for sound settings
+        let customization = {};
+        try {
+            const custResponse = await fetch(BASE_PATH + '/api/customization');
+            const custData = await custResponse.json();
+            customization = custData.customization || {};
+        } catch (e) {}
+        const soundSettings = customization.sounds || {};
+        const systemSounds = soundSettings.system || {};
+
         const prizeSoundSelect = document.getElementById('prizeSound');
         if (prizeSoundSelect) {
             prizeSoundSelect.innerHTML = '<option value="">- None -</option>' + sounds.map(s => `<option value="${s}">${s.split('/').pop()}</option>`).join('');
@@ -392,9 +402,29 @@
 
         const container = document.getElementById('soundsContainer');
         container.innerHTML = `
+            <div style="margin-bottom: 25px; padding: 15px; background: rgba(255,215,0,0.08); border-radius: 10px; border: 1px solid rgba(255,215,0,0.15);">
+                <h4 style="margin: 0 0 15px 0; color: #FFD700;">System Sound Settings</h4>
+                <div class="form-group toggle-group" style="margin-bottom: 12px;">
+                    <label for="soundsEnabled">Sounds Enabled</label>
+                    <input type="checkbox" id="soundsEnabled" ${soundSettings.enabled !== false ? 'checked' : ''} onchange="updateSoundSettings()">
+                </div>
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label for="masterVolume">Master Volume: <span id="volumeDisplay">${soundSettings.master_volume || 75}</span>%</label>
+                    <input type="range" id="masterVolume" min="0" max="100" value="${soundSettings.master_volume || 75}" style="width: 100%;" oninput="document.getElementById('volumeDisplay').textContent = this.value" onchange="updateSoundSettings()">
+                </div>
+                <div class="form-group toggle-group" style="margin-bottom: 12px;">
+                    <label for="tickEnabled">Wheel Spin Tick Sound</label>
+                    <input type="checkbox" id="tickEnabled" ${(systemSounds.tick && systemSounds.tick.enabled !== false) ? 'checked' : ''} onchange="updateSoundSettings()">
+                </div>
+                <div class="form-group" style="margin-bottom: 5px;">
+                    <label for="tickVolume">Tick Volume: <span id="tickVolumeDisplay">${Math.round((systemSounds.tick?.volume || 0.5) * 100)}</span>%</label>
+                    <input type="range" id="tickVolume" min="0" max="100" value="${Math.round((systemSounds.tick?.volume || 0.5) * 100)}" style="width: 100%;" oninput="document.getElementById('tickVolumeDisplay').textContent = this.value" onchange="updateSoundSettings()">
+                </div>
+                <p style="opacity: 0.5; font-size: 12px; margin: 8px 0 0 0;">Tick sound plays as each segment passes the pointer during a spin.</p>
+            </div>
             <div class="form-group" style="margin-bottom: 20px;">
                 <label>Upload New Sound</label>
-                <input type="file" id="soundUpload" accept=".mp3,.wav,.ogg">
+                <input type="file" id="soundUpload" accept=".mp3,.wav,.ogg,.m4a">
                 <button class="btn btn-primary" style="margin-top: 10px;" onclick="uploadSound()">Upload</button>
             </div>
             <h4>Available Sounds</h4>
@@ -404,7 +434,7 @@
                         <button class="btn-sm btn-info" style="margin-right: 10px;" onclick="new Audio('${s}').play()">Play</button>
                         <span>${s.split('/').pop()}</span>
                     </li>
-                `).join('') || '<li>No sounds found.</li>'}
+                `).join('') || '<li>No sounds found. Default sounds are generated automatically.</li>'}
             </ul>`;
     };
 
@@ -551,6 +581,37 @@
         } else {
             const error = await response.json();
             showNotification(`Upload failed: ${error.error}`, 'error');
+        }
+    }
+
+    async function updateSoundSettings() {
+        try {
+            const custResponse = await fetch(BASE_PATH + '/api/customization');
+            const custData = await custResponse.json();
+            const customization = custData.customization || {};
+
+            if (!customization.sounds) customization.sounds = {};
+            if (!customization.sounds.system) customization.sounds.system = {};
+            if (!customization.sounds.system.tick) customization.sounds.system.tick = {};
+
+            customization.sounds.enabled = document.getElementById('soundsEnabled').checked;
+            customization.sounds.master_volume = parseInt(document.getElementById('masterVolume').value);
+            customization.sounds.system.tick.enabled = document.getElementById('tickEnabled').checked;
+            customization.sounds.system.tick.volume = parseInt(document.getElementById('tickVolume').value) / 100;
+
+            const response = await fetch(BASE_PATH + '/api/customization', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(customization)
+            });
+
+            if (response.ok) {
+                showNotification('Sound settings saved!');
+            } else {
+                showNotification('Failed to save sound settings.', 'error');
+            }
+        } catch (e) {
+            showNotification('Error saving sound settings: ' + e.message, 'error');
         }
     }
 

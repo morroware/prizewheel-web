@@ -841,7 +841,7 @@ $advanced = $c['advanced'] ?? [];
     // Helper to normalize paths
     function normalizePath(path) {
       if (!path) return path;
-      if (path.startsWith('/') && !path.startsWith(window.BASE_PATH)) {
+      if (window.BASE_PATH && path.startsWith('/') && !path.startsWith(window.BASE_PATH)) {
         return window.BASE_PATH + path;
       }
       return path;
@@ -852,12 +852,13 @@ $advanced = $c['advanced'] ?? [];
       prizes: <?php echo json_encode($prizes); ?>,
       systemSounds: <?php
         $systemSounds = $config['system_sounds'] ?? [
-          'spin' => '/static/sounds/spin.mp3',
-          'winner' => '/static/sounds/victory.mp3',
-          'loser' => '/static/sounds/try-again.mp3'
+          'spin' => '/static/sounds/spin.wav',
+          'winner' => '/static/sounds/victory.wav',
+          'loser' => '/static/sounds/try-again.wav',
+          'tick' => '/static/sounds/tick.wav'
         ];
         foreach ($systemSounds as $key => $path) {
-          if (strpos($path, '/') === 0 && strpos($path, BASE_PATH) !== 0) {
+          if (!empty($path) && strpos($path, '/') === 0 && BASE_PATH !== '' && strpos($path, BASE_PATH) !== 0) {
             $systemSounds[$key] = BASE_PATH . $path;
           }
         }
@@ -1035,38 +1036,197 @@ $advanced = $c['advanced'] ?? [];
       }
     }
 
-    // Sound Manager
+    // Sound Manager with Web Audio API fallback
     const SoundManager = {
         sounds: {},
         masterVolume: 1.0,
         enabled: <?php echo ($sounds['enabled'] ?? true) ? 'true' : 'false'; ?>,
+        audioContext: null,
+        fallbackSounds: {},
+        activeSources: {},
+
+        getAudioContext() {
+            if (!this.audioContext) {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.warn('Web Audio API not available');
+                }
+            }
+            if (this.audioContext && this.audioContext.state === 'suspended') {
+                this.audioContext.resume();
+            }
+            return this.audioContext;
+        },
+
+        generateFallbackTick() {
+            var ctx = this.getAudioContext();
+            if (!ctx) return null;
+            var sampleRate = ctx.sampleRate;
+            var duration = 0.05;
+            var length = Math.floor(sampleRate * duration);
+            var buffer = ctx.createBuffer(1, length, sampleRate);
+            var data = buffer.getChannelData(0);
+            for (var i = 0; i < length; i++) {
+                var t = i / sampleRate;
+                var env = Math.exp(-t * 80);
+                data[i] = (Math.sin(2 * Math.PI * 1200 * t) * 0.4 +
+                           Math.sin(2 * Math.PI * 2400 * t) * 0.3 +
+                           Math.sin(2 * Math.PI * 800 * t) * 0.2) * env;
+            }
+            return buffer;
+        },
+
+        generateFallbackSpin() {
+            var ctx = this.getAudioContext();
+            if (!ctx) return null;
+            var sampleRate = ctx.sampleRate;
+            var duration = 1.5;
+            var length = Math.floor(sampleRate * duration);
+            var buffer = ctx.createBuffer(1, length, sampleRate);
+            var data = buffer.getChannelData(0);
+            for (var i = 0; i < length; i++) {
+                var t = i / sampleRate;
+                var env = Math.sin(Math.PI * t / duration) * 0.7;
+                var freq = 200 + 800 * (t / duration);
+                data[i] = (Math.sin(2 * Math.PI * freq * t) * 0.4 +
+                           Math.sin(2 * Math.PI * freq * 2.01 * t) * 0.2 +
+                           Math.sin(2 * Math.PI * 1337 * t + Math.sin(t * 7919)) * 0.15) * env;
+            }
+            return buffer;
+        },
+
+        generateFallbackVictory() {
+            var ctx = this.getAudioContext();
+            if (!ctx) return null;
+            var sampleRate = ctx.sampleRate;
+            var duration = 2.0;
+            var length = Math.floor(sampleRate * duration);
+            var buffer = ctx.createBuffer(1, length, sampleRate);
+            var data = buffer.getChannelData(0);
+            var notes = [
+                {start: 0.0, dur: 0.3, freq: 523.25},
+                {start: 0.2, dur: 0.3, freq: 659.25},
+                {start: 0.4, dur: 0.3, freq: 783.99},
+                {start: 0.6, dur: 1.2, freq: 1046.50}
+            ];
+            for (var i = 0; i < length; i++) {
+                var t = i / sampleRate;
+                var val = 0;
+                for (var n = 0; n < notes.length; n++) {
+                    var note = notes[n];
+                    if (t >= note.start && t < note.start + note.dur) {
+                        var lt = t - note.start;
+                        var env = Math.exp(-lt * 3) * 0.8;
+                        val += Math.sin(2 * Math.PI * note.freq * t) * 0.25 * env;
+                        val += Math.sin(2 * Math.PI * note.freq * 2 * t) * 0.1 * env;
+                    }
+                }
+                if (t >= 0.8) {
+                    var ce = Math.exp(-(t - 0.8) * 2) * 0.5;
+                    val += Math.sin(2 * Math.PI * 523.25 * t) * 0.1 * ce;
+                    val += Math.sin(2 * Math.PI * 659.25 * t) * 0.1 * ce;
+                    val += Math.sin(2 * Math.PI * 783.99 * t) * 0.1 * ce;
+                }
+                data[i] = Math.max(-1, Math.min(1, val));
+            }
+            return buffer;
+        },
+
+        generateFallbackLoser() {
+            var ctx = this.getAudioContext();
+            if (!ctx) return null;
+            var sampleRate = ctx.sampleRate;
+            var duration = 1.5;
+            var length = Math.floor(sampleRate * duration);
+            var buffer = ctx.createBuffer(1, length, sampleRate);
+            var data = buffer.getChannelData(0);
+            var notes = [
+                {start: 0.0, dur: 0.35, freqS: 392, freqE: 349},
+                {start: 0.35, dur: 0.35, freqS: 330, freqE: 294},
+                {start: 0.7, dur: 0.8, freqS: 262, freqE: 200}
+            ];
+            for (var i = 0; i < length; i++) {
+                var t = i / sampleRate;
+                var val = 0;
+                for (var n = 0; n < notes.length; n++) {
+                    var note = notes[n];
+                    if (t >= note.start && t < note.start + note.dur) {
+                        var lt = t - note.start;
+                        var prog = lt / note.dur;
+                        var freq = note.freqS + (note.freqE - note.freqS) * prog;
+                        var env = Math.exp(-lt * 2) * 0.7;
+                        val += Math.sin(2 * Math.PI * freq * t) * 0.3 * env;
+                        val += Math.sin(2 * Math.PI * freq * 2 * t) * 0.15 * env;
+                        val += Math.sin(2 * Math.PI * freq * 3 * t) * 0.08 * env;
+                    }
+                }
+                data[i] = Math.max(-1, Math.min(1, val));
+            }
+            return buffer;
+        },
+
+        initFallbacks() {
+            this.fallbackSounds['tick'] = this.generateFallbackTick();
+            this.fallbackSounds['spin'] = this.generateFallbackSpin();
+            this.fallbackSounds['winner'] = this.generateFallbackVictory();
+            this.fallbackSounds['loser'] = this.generateFallbackLoser();
+        },
 
         init(config) {
             if (!this.enabled) return;
 
             this.masterVolume = (config.volume || <?php echo $sounds['master_volume'] ?? 75; ?>) / 100;
-            const soundPaths = new Set();
+            var soundPaths = new Set();
+            var self = this;
+            var loadedCount = 0;
+            var failedCount = 0;
 
             if (config.systemSounds) {
-                Object.values(config.systemSounds).forEach(path => {
+                Object.values(config.systemSounds).forEach(function(path) {
                     if (path) soundPaths.add(path);
                 });
             }
 
-            config.prizes.forEach(prize => {
+            config.prizes.forEach(function(prize) {
                 if (prize.sound_path) soundPaths.add(prize.sound_path);
             });
 
-            soundPaths.forEach(path => {
-                this.sounds[path] = new Audio(path);
-                this.sounds[path].volume = this.masterVolume;
-                this.sounds[path].preload = 'auto';
-                this.sounds[path].onerror = () => {
-                    console.warn('Failed to load sound: ' + path);
+            soundPaths.forEach(function(path) {
+                var audio = new Audio(path);
+                audio.volume = self.masterVolume;
+                audio.preload = 'auto';
+                audio.addEventListener('canplaythrough', function() {
+                    loadedCount++;
+                    console.log('Sound loaded (' + loadedCount + '/' + soundPaths.size + '): ' + path);
+                }, { once: true });
+                audio.onerror = function() {
+                    failedCount++;
+                    console.warn('Failed to load sound (' + failedCount + ' failed): ' + path + ' - will use fallback');
                 };
+                self.sounds[path] = audio;
             });
 
-            console.log('SoundManager initialized with ' + soundPaths.size + ' sounds');
+            // Initialize Web Audio API fallback sounds
+            this.initFallbacks();
+
+            console.log('SoundManager initialized with ' + soundPaths.size + ' sounds (fallbacks ready)');
+        },
+
+        playFallback(key, volume) {
+            var ctx = this.getAudioContext();
+            if (!ctx || !this.fallbackSounds[key]) return;
+            try {
+                var source = ctx.createBufferSource();
+                source.buffer = this.fallbackSounds[key];
+                var gainNode = ctx.createGain();
+                gainNode.gain.value = this.masterVolume * (volume || 1.0);
+                source.connect(gainNode);
+                gainNode.connect(ctx.destination);
+                source.start(0);
+            } catch (e) {
+                console.error('Fallback audio error for ' + key + ':', e);
+            }
         },
 
         play(path, volume) {
@@ -1076,15 +1236,45 @@ $advanced = $c['advanced'] ?? [];
 
             if (this.sounds[path]) {
                 try {
-                    this.sounds[path].currentTime = 0;
-                    this.sounds[path].volume = this.masterVolume * volume;
-                    this.sounds[path].play().catch(function(e) {
-                        console.error('Audio play failed for ' + path + ':', e);
-                    });
+                    // Check if the audio element has loaded successfully
+                    var audio = this.sounds[path];
+                    if (audio.readyState >= 2) {
+                        audio.currentTime = 0;
+                        audio.volume = this.masterVolume * volume;
+                        audio.play().catch(function(e) {
+                            console.warn('Audio play failed for ' + path + ', trying fallback:', e.message);
+                        });
+                        return;
+                    }
                 } catch (e) {
-                    console.error('Audio error for ' + path + ':', e);
+                    console.warn('Audio error for ' + path + ', trying fallback:', e.message);
                 }
             }
+
+            // Try fallback for system sounds
+            var systemSounds = window.WHEEL_CONFIG.systemSounds || {};
+            var fallbackKey = null;
+            Object.keys(systemSounds).forEach(function(key) {
+                if (systemSounds[key] === path) fallbackKey = key;
+            });
+            if (fallbackKey) {
+                this.playFallback(fallbackKey, volume);
+            }
+        },
+
+        playTick(volume) {
+            if (!this.enabled) return;
+            var tickPath = this.getSound('tick');
+            if (tickPath && this.sounds[tickPath] && this.sounds[tickPath].readyState >= 2) {
+                try {
+                    var clone = this.sounds[tickPath].cloneNode();
+                    clone.volume = this.masterVolume * (volume || 0.5);
+                    clone.play().catch(function() {});
+                    return;
+                } catch (e) {}
+            }
+            // Use fallback tick
+            this.playFallback('tick', volume || 0.5);
         },
 
         getSound(key) {
@@ -1093,9 +1283,22 @@ $advanced = $c['advanced'] ?? [];
 
         playSystemSound(key, volume) {
             volume = volume || 1.0;
-            const soundPath = this.getSound(key);
+            var soundPath = this.getSound(key);
             if (soundPath) {
                 this.play(soundPath, volume);
+            } else {
+                // Direct fallback if no path configured
+                this.playFallback(key, volume);
+            }
+        },
+
+        stopSystemSound(key) {
+            var soundPath = this.getSound(key);
+            if (soundPath && this.sounds[soundPath]) {
+                try {
+                    this.sounds[soundPath].pause();
+                    this.sounds[soundPath].currentTime = 0;
+                } catch (e) {}
             }
         }
     };
@@ -1283,11 +1486,30 @@ $advanced = $c['advanced'] ?? [];
       const startTime = performance.now();
       const duration = data.spin_duration || SPIN_DURATION_MS;
 
+      // Track which segment the pointer is on for tick sounds
+      var lastSegmentIndex = -1;
+      var tickEnabled = <?php
+        $tickCfg = $sounds['system']['tick'] ?? [];
+        echo ($tickCfg['enabled'] ?? true) ? 'true' : 'false';
+      ?>;
+      var tickVolume = <?php echo $tickCfg['volume'] ?? 0.5; ?>;
+
       function animate(currentTime) {
         const elapsed = currentTime - startTime;
         const progress = Math.min(elapsed / duration, 1);
         const easeOut = 1 - Math.pow(1 - progress, 4);
         currentRotation = targetRotation * easeOut;
+
+        // Play tick sound when crossing segment boundaries
+        if (tickEnabled && prizes.length > 0) {
+          var normalizedAngle = currentRotation % (Math.PI * 2);
+          if (normalizedAngle < 0) normalizedAngle += Math.PI * 2;
+          var currentSegmentIndex = Math.floor(normalizedAngle / segmentAngle) % prizes.length;
+          if (currentSegmentIndex !== lastSegmentIndex && lastSegmentIndex !== -1) {
+            SoundManager.playTick(tickVolume);
+          }
+          lastSegmentIndex = currentSegmentIndex;
+        }
 
         drawWheel();
 
@@ -1942,6 +2164,46 @@ $advanced = $c['advanced'] ?? [];
       winnerDescription.textContent = prize.description ||
         (isWinner ? 'Congratulations! Claim your royal reward!' : 'Fortune favors the persistent. Try again!');
     }
+
+    // Unlock audio on first user interaction (browser autoplay policy)
+    var audioUnlocked = false;
+    function unlockAudio() {
+      if (audioUnlocked) return;
+      audioUnlocked = true;
+
+      // Resume AudioContext if suspended
+      var ctx = SoundManager.getAudioContext();
+      if (ctx && ctx.state === 'suspended') {
+        ctx.resume().then(function() {
+          console.log('AudioContext resumed after user interaction');
+        });
+      }
+
+      // Prime all loaded audio elements with a silent play attempt
+      Object.keys(SoundManager.sounds).forEach(function(path) {
+        var audio = SoundManager.sounds[path];
+        if (audio && audio.readyState >= 2) {
+          audio.volume = 0;
+          var p = audio.play();
+          if (p && p.then) {
+            p.then(function() {
+              audio.pause();
+              audio.currentTime = 0;
+              audio.volume = SoundManager.masterVolume;
+            }).catch(function() {});
+          }
+        }
+      });
+
+      console.log('Audio unlocked via user interaction');
+      document.removeEventListener('click', unlockAudio);
+      document.removeEventListener('keydown', unlockAudio);
+      document.removeEventListener('touchstart', unlockAudio);
+    }
+
+    document.addEventListener('click', unlockAudio);
+    document.addEventListener('keydown', unlockAudio);
+    document.addEventListener('touchstart', unlockAudio);
 
     // Initialize on DOM ready
     document.addEventListener('DOMContentLoaded', function() {

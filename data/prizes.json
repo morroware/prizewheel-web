@@ -5,7 +5,7 @@
     "weight": 0.1,
     "color": "#00f531",
     "is_winner": true,
-    "sound_path": "/static/sounds/winning_fanfare1.mp3",
+    "sound_path": "/static/sounds/victory.wav",
     "enabled": true,
     "id": "1"
   },
@@ -15,7 +15,7 @@
     "weight": 15.0,
     "color": "#607d8b",
     "is_winner": false,
-    "sound_path": "/static/sounds/Brass-fail4.mp3",
+    "sound_path": "/static/sounds/try-again.wav",
     "enabled": true,
     "id": "2"
   },
@@ -25,7 +25,7 @@
     "weight": 10.0,
     "color": "#e91e63",
     "is_winner": true,
-    "sound_path": "/static/sounds/winning_fanfare1.mp3",
+    "sound_path": "/static/sounds/victory.wav",
     "enabled": true,
     "id": "3"
   },
@@ -35,7 +35,7 @@
     "weight": 5.0,
     "color": "#9e9e9e",
     "is_winner": false,
-    "sound_path": "/static/sounds/Brass-fail2.mp3",
+    "sound_path": "/static/sounds/try-again.wav",
     "enabled": true,
     "id": "4"
   },
@@ -45,7 +45,7 @@
     "weight": 10.0,
     "color": "#f44336",
     "is_winner": true,
-    "sound_path": "/static/sounds/winning_fanfare1.mp3",
+    "sound_path": "/static/sounds/victory.wav",
     "enabled": true,
     "id": "5"
   },
@@ -55,7 +55,7 @@
     "weight": 5.0,
     "color": "#795548",
     "is_winner": false,
-    "sound_path": "/static/sounds/Brass-fail2.mp3",
+    "sound_path": "/static/sounds/try-again.wav",
     "enabled": true,
     "id": "6"
   },
@@ -65,7 +65,7 @@
     "weight": 10.0,
     "color": "#4caf50",
     "is_winner": true,
-    "sound_path": "/static/sounds/winning_fanfare1.mp3",
+    "sound_path": "/static/sounds/victory.wav",
     "enabled": true,
     "id": "7"
   },
@@ -75,7 +75,7 @@
     "weight": 5.0,
     "color": "#bdbdbd",
     "is_winner": false,
-    "sound_path": "/static/sounds/Brass-fail2.mp3",
+    "sound_path": "/static/sounds/try-again.wav",
     "enabled": true,
     "id": "8"
   },
@@ -85,7 +85,7 @@
     "weight": 10.0,
     "color": "#9c27b0",
     "is_winner": true,
-    "sound_path": "/static/sounds/winning_fanfare1.mp3",
+    "sound_path": "/static/sounds/victory.wav",
     "enabled": true,
     "id": "9"
   },
@@ -95,7 +95,7 @@
     "weight": 5.0,
     "color": "#424242",
     "is_winner": false,
-    "sound_path": "/static/sounds/Brass-fail4.mp3",
+    "sound_path": "/static/sounds/try-again.wav",
     "enabled": true,
     "id": "10"
   },
@@ -115,7 +115,7 @@
     "weight": 5.0,
     "color": "#a1887f",
     "is_winner": false,
-    "sound_path": "/static/sounds/Brass-fail2.mp3",
+    "sound_path": "/static/sounds/try-again.wav",
     "enabled": true,
     "id": "12"
   },
@@ -125,7 +125,7 @@
     "weight": 10.0,
     "color": "#ffeb3b",
     "is_winner": true,
-    "sound_path": "/static/sounds/winning_fanfare1.mp3",
+    "sound_path": "/static/sounds/victory.wav",
     "enabled": true,
     "id": "13"
   },
@@ -135,7 +135,7 @@
     "weight": 5.0,
     "color": "#c2185b",
     "is_winner": false,
-    "sound_path": "/static/sounds/Brass-fail2.mp3",
+    "sound_path": "/static/sounds/try-again.wav",
     "enabled": true,
     "id": "14"
   },
@@ -145,7 +145,7 @@
     "weight": 10.0,
     "color": "#03a9f4",
     "is_winner": true,
-    "sound_path": "/static/sounds/winning_fanfare1.mp3",
+    "sound_path": "/static/sounds/victory.wav",
     "enabled": true,
     "id": "15"
   },
@@ -155,7 +155,7 @@
     "weight": 5.0,
     "color": "#616161",
     "is_winner": false,
-    "sound_path": "/static/sounds/Brass-fail2.mp3",
+    "sound_path": "/static/sounds/try-again.wav",
     "enabled": true,
     "id": "16"
   }
