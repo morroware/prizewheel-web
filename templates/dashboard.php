@@ -225,7 +225,18 @@
                 </div>
                 <div class="form-group">
                     <label for="prizeSound">Sound Effect</label>
-                    <select id="prizeSound"></select>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <select id="prizeSound" style="flex: 1;"></select>
+                        <button type="button" class="btn btn-sm btn-info" onclick="previewPrizeSound()" title="Preview Sound">&#9658;</button>
+                    </div>
+                    <small style="display: block; margin-top: 5px;">Leave empty to use default winner/loser sound based on prize type.</small>
+                </div>
+                <div class="form-group" style="margin-top: 10px;">
+                    <label>Or Upload New Sound for This Prize</label>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input type="file" id="prizeSoundUpload" accept=".mp3,.wav,.ogg,.m4a" style="flex: 1;">
+                        <button type="button" class="btn btn-sm btn-success" onclick="uploadPrizeSound()">Upload</button>
+                    </div>
                 </div>
                 <div class="form-grid" style="margin: 20px 0;">
                     <div class="form-group toggle-group">
@@ -397,46 +408,228 @@
 
         const prizeSoundSelect = document.getElementById('prizeSound');
         if (prizeSoundSelect) {
-            prizeSoundSelect.innerHTML = '<option value="">- None -</option>' + sounds.map(s => `<option value="${s}">${s.split('/').pop()}</option>`).join('');
+            prizeSoundSelect.innerHTML = '<option value="">- Use Default (based on win/lose) -</option>' + sounds.map(s => `<option value="${s}">${s.split('/').pop()}</option>`).join('');
         }
+
+        // Helper to create sound selector HTML
+        const createSoundSelector = (id, label, currentPath, volume, showVolumeSlider = true) => {
+            const currentFile = currentPath ? currentPath.split('/').pop() : 'Not set';
+            return `
+                <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <label style="font-weight: 600; color: var(--gold-2);">${label}</label>
+                        <button class="btn btn-sm btn-info" onclick="previewSound('${id}')" title="Preview">&#9658; Play</button>
+                    </div>
+                    <select id="${id}Sound" style="width: 100%; padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.3); border-radius: 5px; color: white; margin-bottom: 8px;" onchange="updateSystemSound('${id}', this.value)">
+                        <option value="">-- Select Sound --</option>
+                        ${sounds.map(s => `<option value="${s}" ${currentPath === s ? 'selected' : ''}>${s.split('/').pop()}</option>`).join('')}
+                    </select>
+                    ${showVolumeSlider ? `
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 12px; opacity: 0.7;">Volume:</span>
+                        <input type="range" id="${id}Volume" min="0" max="100" value="${Math.round((volume || 1) * 100)}" style="flex: 1;" onchange="updateSystemSoundVolume('${id}', this.value)">
+                        <span id="${id}VolumeDisplay" style="font-size: 12px; width: 35px;">${Math.round((volume || 1) * 100)}%</span>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+        };
 
         const container = document.getElementById('soundsContainer');
         container.innerHTML = `
-            <div style="margin-bottom: 25px; padding: 15px; background: rgba(255,215,0,0.08); border-radius: 10px; border: 1px solid rgba(255,215,0,0.15);">
-                <h4 style="margin: 0 0 15px 0; color: #FFD700;">System Sound Settings</h4>
-                <div class="form-group toggle-group" style="margin-bottom: 12px;">
-                    <label for="soundsEnabled">Sounds Enabled</label>
+            <!-- Global Sound Settings -->
+            <div style="margin-bottom: 25px; padding: 20px; background: rgba(255,215,0,0.08); border-radius: 12px; border: 1px solid rgba(255,215,0,0.2);">
+                <h4 style="margin: 0 0 15px 0; color: #FFD700; font-family: 'Cinzel', serif;">&#127925; Global Sound Settings</h4>
+                <div class="form-group toggle-group" style="margin-bottom: 15px;">
+                    <label for="soundsEnabled" style="font-weight: 600;">Enable All Sounds</label>
                     <input type="checkbox" id="soundsEnabled" ${soundSettings.enabled !== false ? 'checked' : ''} onchange="updateSoundSettings()">
                 </div>
-                <div class="form-group" style="margin-bottom: 12px;">
-                    <label for="masterVolume">Master Volume: <span id="volumeDisplay">${soundSettings.master_volume || 75}</span>%</label>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="masterVolume">Master Volume: <span id="volumeDisplay" style="color: var(--gold-1);">${soundSettings.master_volume || 75}</span>%</label>
                     <input type="range" id="masterVolume" min="0" max="100" value="${soundSettings.master_volume || 75}" style="width: 100%;" oninput="document.getElementById('volumeDisplay').textContent = this.value" onchange="updateSoundSettings()">
                 </div>
-                <div class="form-group toggle-group" style="margin-bottom: 12px;">
-                    <label for="tickEnabled">Wheel Spin Tick Sound</label>
-                    <input type="checkbox" id="tickEnabled" ${(systemSounds.tick && systemSounds.tick.enabled !== false) ? 'checked' : ''} onchange="updateSoundSettings()">
-                </div>
-                <div class="form-group" style="margin-bottom: 5px;">
-                    <label for="tickVolume">Tick Volume: <span id="tickVolumeDisplay">${Math.round((systemSounds.tick?.volume || 0.5) * 100)}</span>%</label>
-                    <input type="range" id="tickVolume" min="0" max="100" value="${Math.round((systemSounds.tick?.volume || 0.5) * 100)}" style="width: 100%;" oninput="document.getElementById('tickVolumeDisplay').textContent = this.value" onchange="updateSoundSettings()">
-                </div>
-                <p style="opacity: 0.5; font-size: 12px; margin: 8px 0 0 0;">Tick sound plays as each segment passes the pointer during a spin.</p>
             </div>
-            <div class="form-group" style="margin-bottom: 20px;">
-                <label>Upload New Sound</label>
-                <input type="file" id="soundUpload" accept=".mp3,.wav,.ogg,.m4a">
-                <button class="btn btn-primary" style="margin-top: 10px;" onclick="uploadSound()">Upload</button>
+
+            <!-- System Sounds Configuration -->
+            <div style="margin-bottom: 25px; padding: 20px; background: rgba(107,70,193,0.1); border-radius: 12px; border: 1px solid rgba(107,70,193,0.3);">
+                <h4 style="margin: 0 0 15px 0; color: #FFD700; font-family: 'Cinzel', serif;">&#127926; System Sounds</h4>
+                <p style="opacity: 0.6; font-size: 12px; margin-bottom: 15px;">Customize the sounds that play during wheel events. Upload your own MP3 files below!</p>
+
+                ${createSoundSelector('spin', '&#128296; Wheel Spin Start Sound', systemSounds.spin?.path || '/static/sounds/spin.wav', systemSounds.spin?.volume || 1)}
+                ${createSoundSelector('winner', '&#127942; Winner Sound', systemSounds.winner?.path || '/static/sounds/victory.wav', systemSounds.winner?.volume || 1)}
+                ${createSoundSelector('loser', '&#128549; Try Again Sound', systemSounds.loser?.path || '/static/sounds/try-again.wav', systemSounds.loser?.volume || 1)}
+
+                <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <div>
+                            <label style="font-weight: 600; color: var(--gold-2);">&#128264; Wheel Tick Sound</label>
+                            <p style="opacity: 0.5; font-size: 11px; margin: 3px 0 0 0;">Plays as each segment passes the pointer</p>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <label style="font-size: 12px;">Enabled:</label>
+                            <input type="checkbox" id="tickEnabled" ${(systemSounds.tick && systemSounds.tick.enabled !== false) ? 'checked' : ''} onchange="updateSoundSettings()">
+                            <button class="btn btn-sm btn-info" onclick="previewSound('tick')" title="Preview">&#9658;</button>
+                        </div>
+                    </div>
+                    <select id="tickSound" style="width: 100%; padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.3); border-radius: 5px; color: white; margin-bottom: 8px;" onchange="updateSystemSound('tick', this.value)">
+                        <option value="">-- Select Sound --</option>
+                        ${sounds.map(s => `<option value="${s}" ${(systemSounds.tick?.path || '/static/sounds/tick.wav') === s ? 'selected' : ''}>${s.split('/').pop()}</option>`).join('')}
+                    </select>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 12px; opacity: 0.7;">Volume:</span>
+                        <input type="range" id="tickVolume" min="0" max="100" value="${Math.round((systemSounds.tick?.volume || 0.5) * 100)}" style="flex: 1;" oninput="document.getElementById('tickVolumeDisplay').textContent = this.value + '%'" onchange="updateSystemSoundVolume('tick', this.value)">
+                        <span id="tickVolumeDisplay" style="font-size: 12px; width: 35px;">${Math.round((systemSounds.tick?.volume || 0.5) * 100)}%</span>
+                    </div>
+                </div>
             </div>
-            <h4>Available Sounds</h4>
-            <ul style="list-style: none; max-height: 300px; overflow-y: auto;">
-                ${sounds.map(s => `
-                    <li style="display: flex; align-items: center; padding: 5px; background: rgba(0,0,0,0.2); margin-bottom: 5px; border-radius: 5px;">
-                        <button class="btn-sm btn-info" style="margin-right: 10px;" onclick="new Audio('${s}').play()">Play</button>
-                        <span>${s.split('/').pop()}</span>
-                    </li>
-                `).join('') || '<li>No sounds found. Default sounds are generated automatically.</li>'}
-            </ul>`;
+
+            <!-- Upload New Sound -->
+            <div style="margin-bottom: 25px; padding: 20px; background: rgba(40,167,69,0.1); border-radius: 12px; border: 1px solid rgba(40,167,69,0.3);">
+                <h4 style="margin: 0 0 15px 0; color: #28a745; font-family: 'Cinzel', serif;">&#128228; Upload Custom Sound</h4>
+                <p style="opacity: 0.6; font-size: 12px; margin-bottom: 15px;">Upload MP3, WAV, OGG, or M4A files (max 16MB). After uploading, select it from the dropdowns above.</p>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <input type="file" id="soundUpload" accept=".mp3,.wav,.ogg,.m4a" style="flex: 1; min-width: 200px;">
+                    <button class="btn btn-success" onclick="uploadSound()">&#128228; Upload Sound</button>
+                </div>
+            </div>
+
+            <!-- Available Sounds Library -->
+            <div style="padding: 20px; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                <h4 style="margin: 0 0 15px 0; color: #FFD700; font-family: 'Cinzel', serif;">&#127928; Sound Library</h4>
+                <div style="max-height: 300px; overflow-y: auto;">
+                    ${sounds.length > 0 ? sounds.map(s => {
+                        const filename = s.split('/').pop();
+                        const isDefault = ['spin.wav', 'victory.wav', 'try-again.wav', 'tick.wav'].includes(filename);
+                        return `
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: rgba(0,0,0,0.2); margin-bottom: 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <button class="btn btn-sm btn-info" onclick="playSound('${s}')" title="Play">&#9658;</button>
+                                <span style="font-size: 13px;">${filename}</span>
+                                ${isDefault ? '<span style="font-size: 10px; background: rgba(255,215,0,0.2); padding: 2px 6px; border-radius: 3px; color: var(--gold-2);">DEFAULT</span>' : ''}
+                            </div>
+                            ${!isDefault ? `<button class="btn btn-sm btn-danger" onclick="deleteSound('${s}')" title="Delete">&#128465;</button>` : ''}
+                        </div>
+                    `}).join('') : '<p style="opacity: 0.5; text-align: center;">No sounds found. Upload some MP3 files to get started!</p>'}
+                </div>
+            </div>
+        `;
+
+        // Update volume display listeners
+        ['spin', 'winner', 'loser', 'tick'].forEach(id => {
+            const slider = document.getElementById(id + 'Volume');
+            if (slider) {
+                slider.oninput = function() {
+                    document.getElementById(id + 'VolumeDisplay').textContent = this.value + '%';
+                };
+            }
+        });
     };
+
+    // Play a sound for preview
+    function playSound(path) {
+        const audio = new Audio(path);
+        audio.volume = (parseInt(document.getElementById('masterVolume')?.value || 75)) / 100;
+        audio.play().catch(e => console.log('Audio play failed:', e));
+    }
+
+    // Preview system sound
+    function previewSound(type) {
+        const select = document.getElementById(type + 'Sound');
+        if (select && select.value) {
+            playSound(select.value);
+        } else {
+            // Use default paths
+            const defaults = {
+                spin: BASE_PATH + '/static/sounds/spin.wav',
+                winner: BASE_PATH + '/static/sounds/victory.wav',
+                loser: BASE_PATH + '/static/sounds/try-again.wav',
+                tick: BASE_PATH + '/static/sounds/tick.wav'
+            };
+            if (defaults[type]) {
+                playSound(defaults[type]);
+            }
+        }
+    }
+
+    // Update a system sound path
+    async function updateSystemSound(type, path) {
+        try {
+            const custResponse = await fetch(BASE_PATH + '/api/customization');
+            const custData = await custResponse.json();
+            const customization = custData.customization || {};
+
+            if (!customization.sounds) customization.sounds = {};
+            if (!customization.sounds.system) customization.sounds.system = {};
+            if (!customization.sounds.system[type]) customization.sounds.system[type] = {};
+
+            customization.sounds.system[type].path = path;
+
+            const response = await fetch(BASE_PATH + '/api/customization', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(customization)
+            });
+
+            if (response.ok) {
+                showNotification(`${type.charAt(0).toUpperCase() + type.slice(1)} sound updated!`);
+            } else {
+                showNotification('Failed to update sound.', 'error');
+            }
+        } catch (e) {
+            showNotification('Error updating sound: ' + e.message, 'error');
+        }
+    }
+
+    // Update a system sound volume
+    async function updateSystemSoundVolume(type, volumePercent) {
+        try {
+            const custResponse = await fetch(BASE_PATH + '/api/customization');
+            const custData = await custResponse.json();
+            const customization = custData.customization || {};
+
+            if (!customization.sounds) customization.sounds = {};
+            if (!customization.sounds.system) customization.sounds.system = {};
+            if (!customization.sounds.system[type]) customization.sounds.system[type] = {};
+
+            customization.sounds.system[type].volume = parseInt(volumePercent) / 100;
+
+            const response = await fetch(BASE_PATH + '/api/customization', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(customization)
+            });
+
+            if (!response.ok) {
+                showNotification('Failed to update volume.', 'error');
+            }
+        } catch (e) {
+            showNotification('Error updating volume: ' + e.message, 'error');
+        }
+    }
+
+    // Delete a sound file
+    async function deleteSound(path) {
+        const filename = path.split('/').pop();
+        if (!confirm(`Are you sure you want to delete "${filename}"?`)) return;
+
+        try {
+            const response = await fetch(BASE_PATH + '/api/sounds/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path: path })
+            });
+
+            if (response.ok) {
+                showNotification('Sound deleted successfully!');
+                loadDashboardData();
+            } else {
+                const error = await response.json();
+                showNotification('Failed to delete: ' + (error.error || 'Unknown error'), 'error');
+            }
+        } catch (e) {
+            showNotification('Error deleting sound: ' + e.message, 'error');
+        }
+    }
 
     const renderSystem = () => {
         document.getElementById('systemContainer').innerHTML = `
@@ -497,6 +690,58 @@
         modal.style.display = 'flex';
     }
     const closePrizeModal = () => document.getElementById('prizeModal').style.display = 'none';
+
+    // Preview prize sound
+    function previewPrizeSound() {
+        const select = document.getElementById('prizeSound');
+        if (select && select.value) {
+            const audio = new Audio(select.value);
+            audio.play().catch(e => console.log('Audio play failed:', e));
+        } else {
+            // Play default based on winner/loser state
+            const isWinner = document.getElementById('prizeIsWinner').checked;
+            const defaultSound = isWinner ? BASE_PATH + '/static/sounds/victory.wav' : BASE_PATH + '/static/sounds/try-again.wav';
+            const audio = new Audio(defaultSound);
+            audio.play().catch(e => console.log('Audio play failed:', e));
+        }
+    }
+
+    // Upload sound for prize and select it
+    async function uploadPrizeSound() {
+        const fileInput = document.getElementById('prizeSoundUpload');
+        if (fileInput.files.length === 0) {
+            showNotification('Please select a sound file to upload.', 'error');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+
+        try {
+            const response = await fetch(BASE_PATH + '/api/upload/sound', { method: 'POST', body: formData });
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                showNotification('Sound uploaded successfully!');
+                fileInput.value = '';
+
+                // Refresh the sound list and select the new sound
+                const soundResponse = await fetch(BASE_PATH + '/api/sounds/list');
+                const soundData = await soundResponse.json();
+                const sounds = soundData.sounds || [];
+
+                const prizeSoundSelect = document.getElementById('prizeSound');
+                prizeSoundSelect.innerHTML = '<option value="">- Use Default (based on win/lose) -</option>' + sounds.map(s => `<option value="${s}">${s.split('/').pop()}</option>`).join('');
+
+                // Select the newly uploaded sound
+                prizeSoundSelect.value = data.path;
+            } else {
+                showNotification('Upload failed: ' + (data.error || 'Unknown error'), 'error');
+            }
+        } catch (e) {
+            showNotification('Error uploading sound: ' + e.message, 'error');
+        }
+    }
 
     // API Actions
     async function savePrize(event) {

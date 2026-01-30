@@ -851,11 +851,13 @@ $advanced = $c['advanced'] ?? [];
     window.WHEEL_CONFIG = {
       prizes: <?php echo json_encode($prizes); ?>,
       systemSounds: <?php
-        $systemSounds = $config['system_sounds'] ?? [
-          'spin' => '/static/sounds/spin.wav',
-          'winner' => '/static/sounds/victory.wav',
-          'loser' => '/static/sounds/try-again.wav',
-          'tick' => '/static/sounds/tick.wav'
+        // Load system sounds from customization.json (set via dashboard)
+        $custSounds = $sounds['system'] ?? [];
+        $systemSounds = [
+          'spin' => $custSounds['spin']['path'] ?? '/static/sounds/spin.wav',
+          'winner' => $custSounds['winner']['path'] ?? '/static/sounds/victory.wav',
+          'loser' => $custSounds['loser']['path'] ?? '/static/sounds/try-again.wav',
+          'tick' => $custSounds['tick']['path'] ?? '/static/sounds/tick.wav'
         ];
         foreach ($systemSounds as $key => $path) {
           if (!empty($path) && strpos($path, '/') === 0 && BASE_PATH !== '' && strpos($path, BASE_PATH) !== 0) {
@@ -864,6 +866,17 @@ $advanced = $c['advanced'] ?? [];
         }
         echo json_encode($systemSounds);
       ?>,
+      systemSoundVolumes: <?php
+        // Load per-sound volumes
+        $soundVolumes = [
+          'spin' => $custSounds['spin']['volume'] ?? 1.0,
+          'winner' => $custSounds['winner']['volume'] ?? 1.0,
+          'loser' => $custSounds['loser']['volume'] ?? 1.0,
+          'tick' => $custSounds['tick']['volume'] ?? 0.5
+        ];
+        echo json_encode($soundVolumes);
+      ?>,
+      tickEnabled: <?php echo ($custSounds['tick']['enabled'] ?? true) ? 'true' : 'false'; ?>,
       volume: <?php echo $config['volume'] ?? 75; ?>,
       modalDelayMs: <?php echo $modal['delay_ms'] ?? $config['modal_delay_ms'] ?? 4500; ?>,
       modalAutoCloseMs: <?php echo $modal['auto_close_ms'] ?? $config['modal_auto_close_ms'] ?? 6000; ?>,
@@ -1264,25 +1277,36 @@ $advanced = $c['advanced'] ?? [];
 
         playTick(volume) {
             if (!this.enabled) return;
+            // Check if tick sound is enabled in config
+            if (window.WHEEL_CONFIG.tickEnabled === false) return;
+
+            // Use configured tick volume if not specified
+            var tickVolume = volume ?? (window.WHEEL_CONFIG.systemSoundVolumes?.tick ?? 0.5);
             var tickPath = this.getSound('tick');
             if (tickPath && this.sounds[tickPath] && this.sounds[tickPath].readyState >= 2) {
                 try {
                     var clone = this.sounds[tickPath].cloneNode();
-                    clone.volume = this.masterVolume * (volume || 0.5);
+                    clone.volume = this.masterVolume * tickVolume;
                     clone.play().catch(function() {});
                     return;
                 } catch (e) {}
             }
             // Use fallback tick
-            this.playFallback('tick', volume || 0.5);
+            this.playFallback('tick', tickVolume);
         },
 
         getSound(key) {
             return window.WHEEL_CONFIG.systemSounds?.[key] || '';
         },
 
+        getSoundVolume(key) {
+            return window.WHEEL_CONFIG.systemSoundVolumes?.[key] ?? 1.0;
+        },
+
         playSystemSound(key, volume) {
-            volume = volume || 1.0;
+            // Use configured per-sound volume if not specified
+            var configuredVolume = this.getSoundVolume(key);
+            volume = volume ?? configuredVolume;
             var soundPath = this.getSound(key);
             if (soundPath) {
                 this.play(soundPath, volume);
