@@ -99,10 +99,13 @@ async function startPHPServer() {
     return;
   }
 
-  // Start PHP built-in server
+  // Start PHP built-in server with index.php as router
+  // This ensures all requests (including /dashboard, /odds) are
+  // routed through index.php instead of returning 404
   phpProcess = spawn(phpPath, [
     '-S', `${PHP_HOST}:${PHP_PORT}`,
-    '-t', webappPath
+    '-t', webappPath,
+    path.join(webappPath, 'index.php')
   ], {
     cwd: webappPath,
     stdio: ['ignore', 'pipe', 'pipe']
