@@ -176,20 +176,20 @@
     "master_volume": 75,
     "system": {
       "spin": {
-        "path": "/static/sounds/spin.mp3",
+        "path": "/static/sounds/spin.wav",
         "volume": 1.0
       },
       "winner": {
-        "path": "/static/sounds/victory.mp3",
+        "path": "/static/sounds/victory.wav",
         "volume": 1.0
       },
       "loser": {
-        "path": "/static/sounds/try-again.mp3",
+        "path": "/static/sounds/try-again.wav",
         "volume": 1.0
       },
       "tick": {
-        "enabled": false,
-        "path": "/static/sounds/tick.mp3",
+        "enabled": true,
+        "path": "/static/sounds/tick.wav",
         "volume": 0.5
       },
       "ambient": {
