@@ -32,7 +32,7 @@ $advanced = $c['advanced'] ?? [];
   <?php endif; ?>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="<?php echo htmlspecialchars($fonts['google_fonts_url'] ?? 'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Montserrat:wght@400;600;800&display=swap'); ?>" rel="stylesheet">
+  <link href="<?php echo htmlspecialchars($fonts['google_fonts_url'] ?? 'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800;900&family=Montserrat:wght@400;600;700;800;900&family=Roboto:wght@400;500;700;900&family=Open+Sans:wght@400;600;700;800&family=Lato:wght@400;700;900&family=Oswald:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700;800;900&display=swap'); ?>" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
