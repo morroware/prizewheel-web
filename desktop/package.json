@@ -1,0 +1,62 @@
+{
+  "name": "prizewheel",
+  "version": "1.0.0",
+  "description": "Prize Wheel Desktop Application",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win",
+    "build:portable": "electron-builder --win portable"
+  },
+  "author": "Morroware",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.1.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.morroware.prizewheel",
+    "productName": "Prize Wheel",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Prize Wheel"
+    },
+    "extraResources": [
+      {
+        "from": "../",
+        "to": "webapp",
+        "filter": [
+          "**/*",
+          "!desktop/**",
+          "!.git/**",
+          "!*.md"
+        ]
+      },
+      {
+        "from": "php",
+        "to": "php",
+        "filter": ["**/*"]
+      }
+    ],
+    "files": [
+      "main.js",
+      "preload.js",
+      "assets/**"
+    ]
+  }
+}
