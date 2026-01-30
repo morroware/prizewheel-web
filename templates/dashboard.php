@@ -483,6 +483,58 @@
                 </div>
             </div>
 
+            <!-- Modal Popup Sounds -->
+            <div style="margin-bottom: 25px; padding: 20px; background: rgba(255,193,7,0.1); border-radius: 12px; border: 1px solid rgba(255,193,7,0.3);">
+                <h4 style="margin: 0 0 15px 0; color: #ffc107; font-family: 'Cinzel', serif;">&#127881; Modal Popup Sounds</h4>
+                <p style="opacity: 0.6; font-size: 12px; margin-bottom: 15px;">Optional sounds that play when the winner/loser dialogue appears (separate from the landing sounds above).</p>
+
+                <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <div>
+                            <label style="font-weight: 600; color: var(--gold-2);">&#127942; Winner Modal Sound</label>
+                            <p style="opacity: 0.5; font-size: 11px; margin: 3px 0 0 0;">Plays when the winner popup appears</p>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <label style="font-size: 12px;">Enabled:</label>
+                            <input type="checkbox" id="modalWinnerSoundEnabled" ${systemSounds.modal_winner?.enabled ? 'checked' : ''} onchange="updateSoundSettings()">
+                            <button class="btn btn-sm btn-info" onclick="previewSound('modal_winner')" title="Preview">&#9658;</button>
+                        </div>
+                    </div>
+                    <select id="modal_winnerSound" style="width: 100%; padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.3); border-radius: 5px; color: white; margin-bottom: 8px;" onchange="updateSystemSound('modal_winner', this.value)">
+                        <option value="">-- None (Disabled) --</option>
+                        ${sounds.map(s => `<option value="${s}" ${systemSounds.modal_winner?.path === s ? 'selected' : ''}>${s.split('/').pop()}</option>`).join('')}
+                    </select>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 12px; opacity: 0.7;">Volume:</span>
+                        <input type="range" id="modal_winnerVolume" min="0" max="100" value="${Math.round((systemSounds.modal_winner?.volume || 1) * 100)}" style="flex: 1;" oninput="document.getElementById('modal_winnerVolumeDisplay').textContent = this.value + '%'" onchange="updateSystemSoundVolume('modal_winner', this.value)">
+                        <span id="modal_winnerVolumeDisplay" style="font-size: 12px; width: 35px;">${Math.round((systemSounds.modal_winner?.volume || 1) * 100)}%</span>
+                    </div>
+                </div>
+
+                <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <div>
+                            <label style="font-weight: 600; color: var(--gold-2);">&#128549; Loser Modal Sound</label>
+                            <p style="opacity: 0.5; font-size: 11px; margin: 3px 0 0 0;">Plays when the try again popup appears</p>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <label style="font-size: 12px;">Enabled:</label>
+                            <input type="checkbox" id="modalLoserSoundEnabled" ${systemSounds.modal_loser?.enabled ? 'checked' : ''} onchange="updateSoundSettings()">
+                            <button class="btn btn-sm btn-info" onclick="previewSound('modal_loser')" title="Preview">&#9658;</button>
+                        </div>
+                    </div>
+                    <select id="modal_loserSound" style="width: 100%; padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.3); border-radius: 5px; color: white; margin-bottom: 8px;" onchange="updateSystemSound('modal_loser', this.value)">
+                        <option value="">-- None (Disabled) --</option>
+                        ${sounds.map(s => `<option value="${s}" ${systemSounds.modal_loser?.path === s ? 'selected' : ''}>${s.split('/').pop()}</option>`).join('')}
+                    </select>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 12px; opacity: 0.7;">Volume:</span>
+                        <input type="range" id="modal_loserVolume" min="0" max="100" value="${Math.round((systemSounds.modal_loser?.volume || 1) * 100)}" style="flex: 1;" oninput="document.getElementById('modal_loserVolumeDisplay').textContent = this.value + '%'" onchange="updateSystemSoundVolume('modal_loser', this.value)">
+                        <span id="modal_loserVolumeDisplay" style="font-size: 12px; width: 35px;">${Math.round((systemSounds.modal_loser?.volume || 1) * 100)}%</span>
+                    </div>
+                </div>
+            </div>
+
             <!-- Upload New Sound -->
             <div style="margin-bottom: 25px; padding: 20px; background: rgba(40,167,69,0.1); border-radius: 12px; border: 1px solid rgba(40,167,69,0.3);">
                 <h4 style="margin: 0 0 15px 0; color: #28a745; font-family: 'Cinzel', serif;">&#128228; Upload Custom Sound</h4>
@@ -520,7 +572,7 @@
         `;
 
         // Update volume display listeners
-        ['spin', 'winner', 'loser', 'tick'].forEach(id => {
+        ['spin', 'winner', 'loser', 'tick', 'modal_winner', 'modal_loser'].forEach(id => {
             const slider = document.getElementById(id + 'Volume');
             if (slider) {
                 slider.oninput = function() {
@@ -965,11 +1017,17 @@
             if (!customization.sounds) customization.sounds = {};
             if (!customization.sounds.system) customization.sounds.system = {};
             if (!customization.sounds.system.tick) customization.sounds.system.tick = {};
+            if (!customization.sounds.system.modal_winner) customization.sounds.system.modal_winner = {};
+            if (!customization.sounds.system.modal_loser) customization.sounds.system.modal_loser = {};
 
             customization.sounds.enabled = document.getElementById('soundsEnabled').checked;
             customization.sounds.master_volume = parseInt(document.getElementById('masterVolume').value);
             customization.sounds.system.tick.enabled = document.getElementById('tickEnabled').checked;
             customization.sounds.system.tick.volume = parseInt(document.getElementById('tickVolume').value) / 100;
+
+            // Modal popup sounds
+            customization.sounds.system.modal_winner.enabled = document.getElementById('modalWinnerSoundEnabled').checked;
+            customization.sounds.system.modal_loser.enabled = document.getElementById('modalLoserSoundEnabled').checked;
 
             const response = await fetch(BASE_PATH + '/api/customization', {
                 method: 'POST',
