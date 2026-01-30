@@ -857,7 +857,9 @@ $advanced = $c['advanced'] ?? [];
           'spin' => $custSounds['spin']['path'] ?? '/static/sounds/spin.wav',
           'winner' => $custSounds['winner']['path'] ?? '/static/sounds/victory.wav',
           'loser' => $custSounds['loser']['path'] ?? '/static/sounds/try-again.wav',
-          'tick' => $custSounds['tick']['path'] ?? '/static/sounds/tick.wav'
+          'tick' => $custSounds['tick']['path'] ?? '/static/sounds/tick.wav',
+          'modal_winner' => $custSounds['modal_winner']['path'] ?? '',
+          'modal_loser' => $custSounds['modal_loser']['path'] ?? ''
         ];
         foreach ($systemSounds as $key => $path) {
           if (!empty($path) && strpos($path, '/') === 0 && BASE_PATH !== '' && strpos($path, BASE_PATH) !== 0) {
@@ -872,11 +874,15 @@ $advanced = $c['advanced'] ?? [];
           'spin' => $custSounds['spin']['volume'] ?? 1.0,
           'winner' => $custSounds['winner']['volume'] ?? 1.0,
           'loser' => $custSounds['loser']['volume'] ?? 1.0,
-          'tick' => $custSounds['tick']['volume'] ?? 0.5
+          'tick' => $custSounds['tick']['volume'] ?? 0.5,
+          'modal_winner' => $custSounds['modal_winner']['volume'] ?? 1.0,
+          'modal_loser' => $custSounds['modal_loser']['volume'] ?? 1.0
         ];
         echo json_encode($soundVolumes);
       ?>,
       tickEnabled: <?php echo ($custSounds['tick']['enabled'] ?? true) ? 'true' : 'false'; ?>,
+      modalWinnerSoundEnabled: <?php echo ($custSounds['modal_winner']['enabled'] ?? false) ? 'true' : 'false'; ?>,
+      modalLoserSoundEnabled: <?php echo ($custSounds['modal_loser']['enabled'] ?? false) ? 'true' : 'false'; ?>,
       volume: <?php echo $config['volume'] ?? 75; ?>,
       modalDelayMs: <?php echo $modal['delay_ms'] ?? $config['modal_delay_ms'] ?? 4500; ?>,
       modalAutoCloseMs: <?php echo $modal['auto_close_ms'] ?? $config['modal_auto_close_ms'] ?? 6000; ?>,
@@ -1570,6 +1576,13 @@ $advanced = $c['advanced'] ?? [];
 
       populateWinnerModal(winner);
       winnerModal.style.display = 'flex';
+
+      // Play modal popup sound if enabled
+      if (winner.is_winner && window.WHEEL_CONFIG.modalWinnerSoundEnabled) {
+        SoundManager.playSystemSound('modal_winner');
+      } else if (!winner.is_winner && window.WHEEL_CONFIG.modalLoserSoundEnabled) {
+        SoundManager.playSystemSound('modal_loser');
+      }
 
       // Start modal countdown animation
       startModalCountdown(AUTO_CLOSE_MS);
