@@ -676,6 +676,47 @@ if (strpos($path, '/api/') === 0) {
         }
     }
 
+    // POST /api/sounds/delete - Delete a sound file
+    if ($path === '/api/sounds/delete' && $requestMethod === 'POST') {
+        $input = json_decode(file_get_contents('php://input'), true);
+        $path = $input['path'] ?? '';
+
+        if (empty($path)) {
+            jsonResponse(['success' => false, 'error' => 'No path provided'], 400);
+        }
+
+        // Extract filename from path and validate
+        $filename = basename($path);
+
+        // Prevent deletion of default sounds
+        $defaultSounds = ['spin.wav', 'victory.wav', 'try-again.wav', 'tick.wav'];
+        if (in_array($filename, $defaultSounds)) {
+            jsonResponse(['success' => false, 'error' => 'Cannot delete default system sounds'], 400);
+        }
+
+        // Only allow deleting from sounds directory
+        $soundsDir = STATIC_DIR . 'sounds/';
+        $fullPath = $soundsDir . $filename;
+
+        // Security check: ensure path is within sounds directory
+        $realSoundsDir = realpath($soundsDir);
+        $realFullPath = realpath($fullPath);
+
+        if ($realFullPath === false || strpos($realFullPath, $realSoundsDir) !== 0) {
+            jsonResponse(['success' => false, 'error' => 'Invalid path'], 400);
+        }
+
+        if (!file_exists($fullPath)) {
+            jsonResponse(['success' => false, 'error' => 'File not found'], 404);
+        }
+
+        if (unlink($fullPath)) {
+            jsonResponse(['success' => true, 'message' => 'Sound deleted successfully']);
+        } else {
+            jsonResponse(['success' => false, 'error' => 'Failed to delete file'], 500);
+        }
+    }
+
     // DELETE /api/stats - Clear history
     if ($path === '/api/stats' && $requestMethod === 'DELETE') {
         saveJsonFile(HISTORY_FILE, []);
