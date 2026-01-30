@@ -491,23 +491,28 @@
                     <input type="file" id="soundUpload" accept=".mp3,.wav,.ogg,.m4a" style="flex: 1; min-width: 200px;">
                     <button class="btn btn-success" onclick="uploadSound()">&#128228; Upload Sound</button>
                 </div>
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <button class="btn btn-sm btn-warning" onclick="testSoundPlayback()">&#128270; Test Sound System</button>
+                    <span id="soundTestResult" style="margin-left: 10px; font-size: 12px;"></span>
+                </div>
             </div>
 
             <!-- Available Sounds Library -->
             <div style="padding: 20px; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
                 <h4 style="margin: 0 0 15px 0; color: #FFD700; font-family: 'Cinzel', serif;">&#127928; Sound Library</h4>
-                <div style="max-height: 300px; overflow-y: auto;">
-                    ${sounds.length > 0 ? sounds.map(s => {
+                <div id="soundLibraryList" style="max-height: 300px; overflow-y: auto;">
+                    ${sounds.length > 0 ? sounds.map((s, idx) => {
                         const filename = s.split('/').pop();
                         const isDefault = ['spin.wav', 'victory.wav', 'try-again.wav', 'tick.wav'].includes(filename);
+                        const escapedPath = escapeHtml(s);
                         return `
                         <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: rgba(0,0,0,0.2); margin-bottom: 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
                             <div style="display: flex; align-items: center; gap: 10px;">
-                                <button class="btn btn-sm btn-info" onclick="playSound('${s}')" title="Play">&#9658;</button>
-                                <span style="font-size: 13px;">${filename}</span>
+                                <button class="btn btn-sm btn-info" data-sound-path="${escapedPath}" onclick="playSoundFromButton(this)" title="Play">&#9658;</button>
+                                <span style="font-size: 13px;">${escapeHtml(filename)}</span>
                                 ${isDefault ? '<span style="font-size: 10px; background: rgba(255,215,0,0.2); padding: 2px 6px; border-radius: 3px; color: var(--gold-2);">DEFAULT</span>' : ''}
                             </div>
-                            ${!isDefault ? `<button class="btn btn-sm btn-danger" onclick="deleteSound('${s}')" title="Delete">&#128465;</button>` : ''}
+                            ${!isDefault ? `<button class="btn btn-sm btn-danger" data-sound-path="${escapedPath}" onclick="deleteSoundFromButton(this)" title="Delete">&#128465;</button>` : ''}
                         </div>
                     `}).join('') : '<p style="opacity: 0.5; text-align: center;">No sounds found. Upload some MP3 files to get started!</p>'}
                 </div>
@@ -525,29 +530,145 @@
         });
     };
 
+    // Test sound playback system
+    async function testSoundPlayback() {
+        const resultEl = document.getElementById('soundTestResult');
+        resultEl.innerHTML = '<span style="color: #ffc107;">Testing...</span>';
+
+        const testPath = '/static/sounds/tick.wav';
+        const fullPath = BASE_PATH + testPath;
+
+        console.log('=== Sound System Test ===');
+        console.log('BASE_PATH:', BASE_PATH);
+        console.log('Test path:', fullPath);
+
+        // Step 1: Check if file exists via fetch
+        try {
+            const response = await fetch(fullPath, { method: 'HEAD' });
+            console.log('Fetch response:', response.status, response.headers.get('content-type'));
+
+            if (!response.ok) {
+                resultEl.innerHTML = `<span style="color: #dc3545;">❌ File not found (HTTP ${response.status}). Path: ${fullPath}</span>`;
+                return;
+            }
+        } catch (e) {
+            resultEl.innerHTML = `<span style="color: #dc3545;">❌ Network error: ${e.message}</span>`;
+            console.error('Fetch error:', e);
+            return;
+        }
+
+        // Step 2: Try to load audio
+        const audio = new Audio();
+
+        const loadPromise = new Promise((resolve, reject) => {
+            audio.oncanplaythrough = () => resolve('loaded');
+            audio.onerror = () => reject(new Error('Audio load error: ' + (audio.error?.message || 'Unknown')));
+            setTimeout(() => reject(new Error('Timeout loading audio')), 5000);
+        });
+
+        audio.src = fullPath;
+        audio.load();
+
+        try {
+            await loadPromise;
+            console.log('Audio loaded successfully');
+        } catch (e) {
+            resultEl.innerHTML = `<span style="color: #dc3545;">❌ Audio load failed: ${e.message}</span>`;
+            console.error('Audio load error:', e, audio.error);
+            return;
+        }
+
+        // Step 3: Try to play
+        try {
+            audio.volume = 0.5;
+            await audio.play();
+            resultEl.innerHTML = '<span style="color: #28a745;">✅ Sound system working! You should hear a tick.</span>';
+            console.log('Audio played successfully');
+        } catch (e) {
+            resultEl.innerHTML = `<span style="color: #dc3545;">❌ Play failed: ${e.name} - ${e.message}</span>`;
+            console.error('Audio play error:', e);
+        }
+    }
+
+    // Helper to play sound from button data attribute
+    function playSoundFromButton(button) {
+        const path = button.getAttribute('data-sound-path');
+        if (path) {
+            playSound(path);
+        }
+    }
+
+    // Helper to delete sound from button data attribute
+    function deleteSoundFromButton(button) {
+        const path = button.getAttribute('data-sound-path');
+        if (path) {
+            deleteSound(path);
+        }
+    }
+
     // Play a sound for preview
     function playSound(path) {
-        const audio = new Audio(path);
-        audio.volume = (parseInt(document.getElementById('masterVolume')?.value || 75)) / 100;
-        audio.play().catch(e => console.log('Audio play failed:', e));
+        if (!path) {
+            console.log('No sound path provided');
+            return;
+        }
+
+        // Normalize path - the API already includes BASE_PATH, but handle edge cases
+        let soundPath = path;
+        if (path.startsWith('/') && BASE_PATH && !path.startsWith(BASE_PATH)) {
+            soundPath = BASE_PATH + path;
+        }
+
+        console.log('Playing sound:', soundPath);
+
+        const audio = new Audio();
+        audio.preload = 'auto';
+
+        audio.oncanplaythrough = function() {
+            audio.volume = (parseInt(document.getElementById('masterVolume')?.value || 75)) / 100;
+            audio.play().then(() => {
+                console.log('Sound playing successfully');
+            }).catch(e => {
+                console.error('Audio play failed:', e.name, e.message);
+                showNotification('Failed to play sound: ' + e.message, 'error');
+            });
+        };
+
+        audio.onerror = function(e) {
+            console.error('Audio load error for:', soundPath, audio.error);
+            showNotification('Failed to load sound file. Check if file exists.', 'error');
+        };
+
+        audio.src = soundPath;
+        audio.load();
     }
 
     // Preview system sound
     function previewSound(type) {
         const select = document.getElementById(type + 'Sound');
+        let soundPath;
+
         if (select && select.value) {
-            playSound(select.value);
+            soundPath = select.value;
         } else {
             // Use default paths
             const defaults = {
-                spin: BASE_PATH + '/static/sounds/spin.wav',
-                winner: BASE_PATH + '/static/sounds/victory.wav',
-                loser: BASE_PATH + '/static/sounds/try-again.wav',
-                tick: BASE_PATH + '/static/sounds/tick.wav'
+                spin: '/static/sounds/spin.wav',
+                winner: '/static/sounds/victory.wav',
+                loser: '/static/sounds/try-again.wav',
+                tick: '/static/sounds/tick.wav'
             };
-            if (defaults[type]) {
-                playSound(defaults[type]);
+            soundPath = defaults[type];
+        }
+
+        if (soundPath) {
+            // Ensure proper path with BASE_PATH
+            if (soundPath.startsWith('/') && !soundPath.startsWith(BASE_PATH + '/') && BASE_PATH) {
+                soundPath = BASE_PATH + soundPath;
+            } else if (soundPath.startsWith('/') && !BASE_PATH) {
+                // BASE_PATH is empty, path is fine
             }
+            playSound(soundPath);
         }
     }
 
@@ -694,16 +815,22 @@
     // Preview prize sound
     function previewPrizeSound() {
         const select = document.getElementById('prizeSound');
+        let soundPath;
+
         if (select && select.value) {
-            const audio = new Audio(select.value);
-            audio.play().catch(e => console.log('Audio play failed:', e));
+            soundPath = select.value;
         } else {
             // Play default based on winner/loser state
             const isWinner = document.getElementById('prizeIsWinner').checked;
-            const defaultSound = isWinner ? BASE_PATH + '/static/sounds/victory.wav' : BASE_PATH + '/static/sounds/try-again.wav';
-            const audio = new Audio(defaultSound);
-            audio.play().catch(e => console.log('Audio play failed:', e));
+            soundPath = isWinner ? '/static/sounds/victory.wav' : '/static/sounds/try-again.wav';
         }
+
+        // Ensure proper path with BASE_PATH
+        if (soundPath && soundPath.startsWith('/') && BASE_PATH && !soundPath.startsWith(BASE_PATH + '/')) {
+            soundPath = BASE_PATH + soundPath;
+        }
+
+        playSound(soundPath);
     }
 
     // Upload sound for prize and select it
