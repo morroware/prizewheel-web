@@ -365,6 +365,16 @@ $requestMethod = $_SERVER['REQUEST_METHOD'];
 // Remove query string from URI
 $path = parse_url($requestUri, PHP_URL_PATH);
 
+// For PHP built-in server, let it handle static files directly if they exist
+// This check runs BEFORE any path manipulation
+if (php_sapi_name() === 'cli-server') {
+    $staticFile = __DIR__ . $path;
+    if (is_file($staticFile)) {
+        // Return false to let PHP's built-in server handle the file
+        return false;
+    }
+}
+
 // Remove base path if running in subdirectory
 $basePath = dirname($_SERVER['SCRIPT_NAME']);
 if ($basePath !== '/' && strpos($path, $basePath) === 0) {
@@ -383,8 +393,12 @@ function jsonResponse($data, $statusCode = 200) {
 // Handle static files
 if (strpos($path, '/static/') === 0) {
     $filePath = __DIR__ . $path;
+
+    // Debug logging
+    error_log("Static file request - Path: $path, FilePath: $filePath, Exists: " . (file_exists($filePath) ? 'yes' : 'no'));
+
     if (file_exists($filePath) && is_file($filePath)) {
-        $ext = pathinfo($filePath, PATHINFO_EXTENSION);
+        $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
         $mimeTypes = [
             'css' => 'text/css',
             'js' => 'application/javascript',
@@ -394,16 +408,29 @@ if (strpos($path, '/static/') === 0) {
             'jpeg' => 'image/jpeg',
             'gif' => 'image/gif',
             'svg' => 'image/svg+xml',
+            'ico' => 'image/x-icon',
+            'webp' => 'image/webp',
             'mp3' => 'audio/mpeg',
             'wav' => 'audio/wav',
             'ogg' => 'audio/ogg',
-            'm4a' => 'audio/mp4'
+            'm4a' => 'audio/mp4',
+            'woff' => 'font/woff',
+            'woff2' => 'font/woff2',
+            'ttf' => 'font/ttf'
         ];
-        header('Content-Type: ' . ($mimeTypes[$ext] ?? 'application/octet-stream'));
+
+        $contentType = $mimeTypes[$ext] ?? 'application/octet-stream';
+        header('Content-Type: ' . $contentType);
+        header('Content-Length: ' . filesize($filePath));
+        header('Cache-Control: public, max-age=86400');
+
         readfile($filePath);
         exit;
     }
+
+    error_log("Static file NOT FOUND - Path: $path, Tried: $filePath, __DIR__: " . __DIR__);
     http_response_code(404);
+    echo "File not found: $path";
     exit;
 }
 
