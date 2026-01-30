@@ -10,7 +10,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prize Wheel Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800;900&family=Montserrat:wght@400;600;700;800;900&family=Roboto:wght@400;500;700;900&family=Open+Sans:wght@400;600;700;800&family=Lato:wght@400;700;900&family=Oswald:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --gold-1: #ffd700; --gold-2: #ffb300; --royal-purple: #6B46C1;
@@ -1168,6 +1168,80 @@
                 </div>
             </div>
 
+            <!-- Wheel Text & Fonts -->
+            <div class="customization-section">
+                <div class="customization-section-title" onclick="toggleSection(this)">Wheel Text & Fonts</div>
+                <div class="customization-section-content">
+                    <p style="font-size: 12px; opacity: 0.7; margin-bottom: 15px;">Customize how prize names appear on the wheel segments.</p>
+
+                    <div class="form-grid">
+                        <div class="text-input-row">
+                            <label>Font Family</label>
+                            <select id="wheelTextFont" style="width: 100%; padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.3); border-radius: 5px; color: white;">
+                                <option value="'Cinzel', serif" ${(wheel.text?.font_family || "'Cinzel', serif") === "'Cinzel', serif" ? 'selected' : ''}>Cinzel (Default)</option>
+                                <option value="'Montserrat', sans-serif" ${wheel.text?.font_family === "'Montserrat', sans-serif" ? 'selected' : ''}>Montserrat</option>
+                                <option value="'Arial Black', sans-serif" ${wheel.text?.font_family === "'Arial Black', sans-serif" ? 'selected' : ''}>Arial Black</option>
+                                <option value="'Impact', sans-serif" ${wheel.text?.font_family === "'Impact', sans-serif" ? 'selected' : ''}>Impact</option>
+                                <option value="'Georgia', serif" ${wheel.text?.font_family === "'Georgia', serif" ? 'selected' : ''}>Georgia</option>
+                                <option value="'Trebuchet MS', sans-serif" ${wheel.text?.font_family === "'Trebuchet MS', sans-serif" ? 'selected' : ''}>Trebuchet MS</option>
+                                <option value="'Verdana', sans-serif" ${wheel.text?.font_family === "'Verdana', sans-serif" ? 'selected' : ''}>Verdana</option>
+                                <option value="'Comic Sans MS', cursive" ${wheel.text?.font_family === "'Comic Sans MS', cursive" ? 'selected' : ''}>Comic Sans</option>
+                                <option value="'Courier New', monospace" ${wheel.text?.font_family === "'Courier New', monospace" ? 'selected' : ''}>Courier New</option>
+                                <option value="'Roboto', sans-serif" ${wheel.text?.font_family === "'Roboto', sans-serif" ? 'selected' : ''}>Roboto</option>
+                                <option value="'Open Sans', sans-serif" ${wheel.text?.font_family === "'Open Sans', sans-serif" ? 'selected' : ''}>Open Sans</option>
+                                <option value="'Lato', sans-serif" ${wheel.text?.font_family === "'Lato', sans-serif" ? 'selected' : ''}>Lato</option>
+                                <option value="'Oswald', sans-serif" ${wheel.text?.font_family === "'Oswald', sans-serif" ? 'selected' : ''}>Oswald</option>
+                                <option value="'Playfair Display', serif" ${wheel.text?.font_family === "'Playfair Display', serif" ? 'selected' : ''}>Playfair Display</option>
+                            </select>
+                        </div>
+                        <div class="text-input-row">
+                            <label>Font Weight</label>
+                            <select id="wheelTextWeight" style="width: 100%; padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.3); border-radius: 5px; color: white;">
+                                <option value="400" ${wheel.text?.font_weight === '400' ? 'selected' : ''}>Normal (400)</option>
+                                <option value="600" ${wheel.text?.font_weight === '600' ? 'selected' : ''}>Semi-Bold (600)</option>
+                                <option value="700" ${wheel.text?.font_weight === '700' ? 'selected' : ''}>Bold (700)</option>
+                                <option value="800" ${wheel.text?.font_weight === '800' ? 'selected' : ''}>Extra-Bold (800)</option>
+                                <option value="900" ${(wheel.text?.font_weight || '900') === '900' ? 'selected' : ''}>Black (900) - Default</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="slider-row" style="margin-top: 15px;">
+                        <label>Maximum Font Size <span class="slider-value" id="wheelTextMaxSizeValue">${wheel.text?.max_font_size || 24}</span>px</label>
+                        <input type="range" id="wheelTextMaxSize" value="${wheel.text?.max_font_size || 24}" min="12" max="48" oninput="document.getElementById('wheelTextMaxSizeValue').textContent = this.value">
+                    </div>
+                    <div class="slider-row">
+                        <label>Minimum Font Size <span class="slider-value" id="wheelTextMinSizeValue">${wheel.text?.min_font_size || 8}</span>px</label>
+                        <input type="range" id="wheelTextMinSize" value="${wheel.text?.min_font_size || 8}" min="6" max="20" oninput="document.getElementById('wheelTextMinSizeValue').textContent = this.value">
+                    </div>
+
+                    <div class="color-grid" style="margin-top: 15px;">
+                        ${renderColorInput('Text Color', 'wheelTextColor', wheel.text?.color || '#ffffff')}
+                        ${renderColorInput('Text Outline', 'wheelTextStroke', wheel.text?.stroke_color || 'rgba(0,0,0,0.8)')}
+                    </div>
+
+                    <div class="slider-row" style="margin-top: 15px;">
+                        <label>Text Outline Thickness <span class="slider-value" id="wheelTextStrokeValue">${Math.round((wheel.text?.stroke_width_ratio || 0.125) * 100)}</span>%</label>
+                        <input type="range" id="wheelTextStrokeWidth" value="${Math.round((wheel.text?.stroke_width_ratio || 0.125) * 100)}" min="0" max="30" oninput="document.getElementById('wheelTextStrokeValue').textContent = this.value">
+                    </div>
+
+                    <div class="toggle-row" style="margin-top: 15px;">
+                        <span class="toggle-label">Use Text Gradient</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="wheelTextGradient" ${wheel.text?.use_gradient !== false ? 'checked' : ''}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div style="margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px;">
+                        <label style="display: block; margin-bottom: 10px; font-weight: 600; color: var(--gold-2);">Preview Text Style</label>
+                        <div id="textPreview" style="font-size: 24px; text-align: center; padding: 15px; background: rgba(107,70,193,0.3); border-radius: 8px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">
+                            Sample Prize Text
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Effects -->
             <div class="customization-section">
                 <div class="customization-section-title" onclick="toggleSection(this)">Effects</div>
@@ -1268,6 +1342,43 @@
                 <input type="file" id="importFile" style="display: none;" accept=".json" onchange="importCustomization(this)">
             </div>
         `;
+
+        // Set up live preview for text settings
+        setupTextPreviewListeners();
+    }
+
+    function setupTextPreviewListeners() {
+        const updatePreview = () => {
+            const preview = document.getElementById('textPreview');
+            if (!preview) return;
+
+            const fontFamily = document.getElementById('wheelTextFont')?.value || "'Cinzel', serif";
+            const fontWeight = document.getElementById('wheelTextWeight')?.value || '900';
+            const fontSize = document.getElementById('wheelTextMaxSize')?.value || '24';
+            const textColor = document.getElementById('wheelTextColorText')?.value || '#ffffff';
+            const strokeColor = document.getElementById('wheelTextStrokeText')?.value || 'rgba(0,0,0,0.8)';
+            const strokeWidth = (parseInt(document.getElementById('wheelTextStrokeWidth')?.value || '12') / 100) * parseInt(fontSize);
+
+            preview.style.fontFamily = fontFamily;
+            preview.style.fontWeight = fontWeight;
+            preview.style.fontSize = fontSize + 'px';
+            preview.style.color = textColor;
+            preview.style.textShadow = `${strokeWidth}px ${strokeWidth}px ${strokeWidth * 2}px ${strokeColor}`;
+        };
+
+        // Attach listeners to all text setting inputs
+        ['wheelTextFont', 'wheelTextWeight', 'wheelTextMaxSize', 'wheelTextMinSize',
+         'wheelTextColor', 'wheelTextColorText', 'wheelTextStroke', 'wheelTextStrokeText',
+         'wheelTextStrokeWidth', 'wheelTextGradient'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', updatePreview);
+                el.addEventListener('change', updatePreview);
+            }
+        });
+
+        // Initial preview update
+        setTimeout(updatePreview, 100);
     }
 
     function renderColorInput(label, id, value) {
@@ -1350,7 +1461,17 @@
                 },
                 pointer: { color: document.getElementById('wheelPointerColorText').value },
                 center: { icon_color: document.getElementById('wheelCenterIconColorText').value },
-                animation: { float_enabled: document.getElementById('wheelFloatEnabled').checked }
+                animation: { float_enabled: document.getElementById('wheelFloatEnabled').checked },
+                text: {
+                    font_family: document.getElementById('wheelTextFont').value,
+                    font_weight: document.getElementById('wheelTextWeight').value,
+                    max_font_size: parseInt(document.getElementById('wheelTextMaxSize').value),
+                    min_font_size: parseInt(document.getElementById('wheelTextMinSize').value),
+                    color: document.getElementById('wheelTextColorText').value,
+                    stroke_color: document.getElementById('wheelTextStrokeText').value,
+                    stroke_width_ratio: parseInt(document.getElementById('wheelTextStrokeWidth').value) / 100,
+                    use_gradient: document.getElementById('wheelTextGradient').checked
+                }
             },
             effects: {
                 confetti: {
