@@ -376,49 +376,32 @@ $path = parse_url($requestUri, PHP_URL_PATH);
 // For PHP built-in server, let it handle static files directly if they exist
 // This check runs BEFORE any path manipulation
 if (php_sapi_name() === 'cli-server') {
-    $staticFile = __DIR__ . $path;
-    if (is_file($staticFile)) {
-        // Return false to let PHP's built-in server handle the file
-        // But NOT for /static/sounds/ when USER_DATA_DIR is set — those need routing
-        $userDataDir = getenv('USER_DATA_DIR');
-        if ($userDataDir && strpos($path, '/static/sounds/') === 0) {
-            // Let index.php handle it so we serve from user data dir
-        } else {
+    $userDataDir = getenv('USER_DATA_DIR');
+
+    // When USER_DATA_DIR is set (packaged Electron), handle ALL sound file
+    // requests through index.php so we can serve from the writable user data dir
+    if ($userDataDir && strpos($path, '/static/sounds/') === 0) {
+        // Fall through to index.php routing — do NOT return false
+    } else {
+        $staticFile = __DIR__ . $path;
+        if (is_file($staticFile)) {
             return false;
         }
     }
 }
 
-// Remove base path if running in subdirectory
-$basePath = dirname($_SERVER['SCRIPT_NAME']);
-if ($basePath !== '/' && strpos($path, $basePath) === 0) {
-    $path = substr($path, strlen($basePath));
-}
-if (empty($path)) $path = '/';
-
-// Set JSON content type for API responses
-function jsonResponse($data, $statusCode = 200) {
-    http_response_code($statusCode);
-    header('Content-Type: application/json');
-    echo json_encode($data);
-    exit;
-}
-
-// Handle static files
+// Handle static files EARLY (before base path stripping which can mangle the path)
 if (strpos($path, '/static/') === 0) {
     // First check user data dir (writable location for uploads)
     $filePath = STATIC_DIR . substr($path, strlen('/static/'));
 
     // Fall back to bundled static dir for default assets (CSS, JS, images, fonts)
-    if ((!file_exists($filePath) || !is_file($filePath)) && defined('BUNDLED_STATIC_DIR')) {
+    if ((!file_exists($filePath) || !is_file($filePath)) && defined('BUNDLED_STATIC_DIR') && BUNDLED_STATIC_DIR !== STATIC_DIR) {
         $bundledPath = BUNDLED_STATIC_DIR . substr($path, strlen('/static/'));
         if (file_exists($bundledPath) && is_file($bundledPath)) {
             $filePath = $bundledPath;
         }
     }
-
-    // Debug logging
-    error_log("Static file request - Path: $path, FilePath: $filePath, Exists: " . (file_exists($filePath) ? 'yes' : 'no'));
 
     if (file_exists($filePath) && is_file($filePath)) {
         $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
@@ -445,15 +428,29 @@ if (strpos($path, '/static/') === 0) {
         $contentType = $mimeTypes[$ext] ?? 'application/octet-stream';
         header('Content-Type: ' . $contentType);
         header('Content-Length: ' . filesize($filePath));
-        header('Cache-Control: public, max-age=86400');
+        header('Cache-Control: no-cache');
 
         readfile($filePath);
         exit;
     }
 
-    error_log("Static file NOT FOUND - Path: $path, Tried: $filePath, __DIR__: " . __DIR__);
     http_response_code(404);
     echo "File not found: $path";
+    exit;
+}
+
+// Remove base path if running in subdirectory
+$basePath = dirname($_SERVER['SCRIPT_NAME']);
+if ($basePath !== '/' && strpos($path, $basePath) === 0) {
+    $path = substr($path, strlen($basePath));
+}
+if (empty($path)) $path = '/';
+
+// Set JSON content type for API responses
+function jsonResponse($data, $statusCode = 200) {
+    http_response_code($statusCode);
+    header('Content-Type: application/json');
+    echo json_encode($data);
     exit;
 }
 
