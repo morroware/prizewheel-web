@@ -21,9 +21,17 @@ if ($basePath === '/' || $basePath === '\\') {
 }
 define('BASE_PATH', $basePath);
 
-// Configuration
-define('DATA_DIR', __DIR__ . '/data/');
-define('STATIC_DIR', __DIR__ . '/static/');
+// Configuration - use USER_DATA_DIR for writable paths in packaged Electron builds
+$userDataDir = getenv('USER_DATA_DIR');
+if ($userDataDir !== false && $userDataDir !== '') {
+    define('DATA_DIR', rtrim($userDataDir, '/\\') . '/data/');
+    define('STATIC_DIR', rtrim($userDataDir, '/\\') . '/static/');
+    define('BUNDLED_STATIC_DIR', __DIR__ . '/static/');
+} else {
+    define('DATA_DIR', __DIR__ . '/data/');
+    define('STATIC_DIR', __DIR__ . '/static/');
+    define('BUNDLED_STATIC_DIR', __DIR__ . '/static/');
+}
 define('CONFIG_FILE', DATA_DIR . 'config.json');
 define('PRIZES_FILE', DATA_DIR . 'prizes.json');
 define('HISTORY_FILE', DATA_DIR . 'history.json');
@@ -371,7 +379,13 @@ if (php_sapi_name() === 'cli-server') {
     $staticFile = __DIR__ . $path;
     if (is_file($staticFile)) {
         // Return false to let PHP's built-in server handle the file
-        return false;
+        // But NOT for /static/sounds/ when USER_DATA_DIR is set — those need routing
+        $userDataDir = getenv('USER_DATA_DIR');
+        if ($userDataDir && strpos($path, '/static/sounds/') === 0) {
+            // Let index.php handle it so we serve from user data dir
+        } else {
+            return false;
+        }
     }
 }
 
@@ -392,7 +406,16 @@ function jsonResponse($data, $statusCode = 200) {
 
 // Handle static files
 if (strpos($path, '/static/') === 0) {
-    $filePath = __DIR__ . $path;
+    // First check user data dir (writable location for uploads)
+    $filePath = STATIC_DIR . substr($path, strlen('/static/'));
+
+    // Fall back to bundled static dir for default assets (CSS, JS, images, fonts)
+    if ((!file_exists($filePath) || !is_file($filePath)) && defined('BUNDLED_STATIC_DIR')) {
+        $bundledPath = BUNDLED_STATIC_DIR . substr($path, strlen('/static/'));
+        if (file_exists($bundledPath) && is_file($bundledPath)) {
+            $filePath = $bundledPath;
+        }
+    }
 
     // Debug logging
     error_log("Static file request - Path: $path, FilePath: $filePath, Exists: " . (file_exists($filePath) ? 'yes' : 'no'));
