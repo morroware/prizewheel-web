@@ -929,7 +929,7 @@
         const prize = {
             name: document.getElementById('prizeName').value,
             description: document.getElementById('prizeDescription').value,
-            weight: parseFloat(document.getElementById('prizeWeight').value),
+            weight: parseFloat(document.getElementById('prizeWeight').value) || 1,
             color: document.getElementById('prizeColor').value,
             sound_path: document.getElementById('prizeSound').value,
             is_winner: document.getElementById('prizeIsWinner').checked,
