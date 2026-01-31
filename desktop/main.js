@@ -153,17 +153,17 @@ async function startPHPServer() {
     throw new Error(`PHP not found at: ${phpPath}\nPlease ensure PHP is bundled in the php/ folder.`);
   }
 
+  // Initialize writable user data directory (for packaged builds)
+  let userDataDir = null;
+  if (!isDevMode) {
+    userDataDir = initUserData();
+  }
+
   // Check if port is available
   const portAvailable = await isPortAvailable(PHP_PORT);
   if (!portAvailable) {
     console.log(`Port ${PHP_PORT} already in use, assuming PHP server is running`);
     return;
-  }
-
-  // Initialize writable user data directory (for packaged builds)
-  let userDataDir = null;
-  if (!isDevMode) {
-    userDataDir = initUserData();
   }
 
   // Start PHP built-in server with index.php as router
@@ -217,7 +217,8 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
-      contextIsolation: true
+      contextIsolation: true,
+      autoplayPolicy: 'no-user-gesture-required'
     }
   });
 
@@ -347,6 +348,9 @@ function registerShortcuts() {
     navigateTo('/');
   });
 }
+
+// Allow audio playback without requiring user gesture (needed for sound previews in dashboard)
+app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
 // App lifecycle
 app.whenReady().then(async () => {
