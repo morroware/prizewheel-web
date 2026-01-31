@@ -158,7 +158,9 @@ function createWindow() {
 
   // Open external links in default browser
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    shell.openExternal(url);
+    shell.openExternal(url).catch((err) => {
+      console.error('Failed to open external URL:', err);
+    });
     return { action: 'deny' };
   });
 }

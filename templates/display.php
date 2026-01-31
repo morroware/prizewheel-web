@@ -426,6 +426,9 @@ $advanced = $c['advanced'] ?? [];
         0 0 50px rgba(255,215,0,0.6),
         0 6px 12px rgba(0,0,0,0.6);
       letter-spacing: 2px;
+      max-width: 100%;
+      overflow-wrap: break-word;
+      word-break: break-word;
     }
 
     .winner-description {
@@ -1215,14 +1218,27 @@ $advanced = $c['advanced'] ?? [];
                 var audio = new Audio(path);
                 audio.volume = self.masterVolume;
                 audio.preload = 'auto';
+                var settled = false;
                 audio.addEventListener('canplaythrough', function() {
+                    if (settled) return;
+                    settled = true;
                     loadedCount++;
                     console.log('Sound loaded (' + loadedCount + '/' + soundPaths.size + '): ' + path);
                 }, { once: true });
                 audio.onerror = function() {
+                    if (settled) return;
+                    settled = true;
                     failedCount++;
                     console.warn('Failed to load sound (' + failedCount + ' failed): ' + path + ' - will use fallback');
                 };
+                // Timeout to prevent hanging loads
+                setTimeout(function() {
+                    if (!settled) {
+                        settled = true;
+                        failedCount++;
+                        console.warn('Sound load timed out: ' + path + ' - will use fallback');
+                    }
+                }, 10000);
                 self.sounds[path] = audio;
             });
 
@@ -1500,8 +1516,10 @@ $advanced = $c['advanced'] ?? [];
       const winnerIndex = prizes.findIndex(function(p) { return p.id === winner.id; });
 
       if (winnerIndex === -1) {
+        console.error('Winner prize ID ' + winner.id + ' not found in current prizes array');
         wheelSpinState.isSpinning = false;
         updateWheelStatus();
+        showToast('Spin error: prize not found. Please refresh the page.', 'error');
         return;
       }
 
@@ -2307,6 +2325,33 @@ $advanced = $c['advanced'] ?? [];
       <?php endif; ?>
 
       updateWheelStatus();
+
+      // Cleanup on page unload to prevent memory leaks
+      window.addEventListener('beforeunload', function() {
+        // Stop confetti animation
+        confetti.particles = [];
+        confetti.active = false;
+
+        // Clear modal countdown interval
+        if (typeof modalCountdownInterval !== 'undefined' && modalCountdownInterval) {
+          clearInterval(modalCountdownInterval);
+        }
+
+        // Release audio resources
+        if (SoundManager.audioContext) {
+          SoundManager.audioContext.close().catch(function() {});
+        }
+        Object.keys(SoundManager.sounds).forEach(function(key) {
+          SoundManager.sounds[key].pause();
+          SoundManager.sounds[key].src = '';
+        });
+        SoundManager.sounds = {};
+
+        // Remove audio unlock listeners (if never triggered)
+        document.removeEventListener('click', unlockAudio);
+        document.removeEventListener('keydown', unlockAudio);
+        document.removeEventListener('touchstart', unlockAudio);
+      });
 
       console.log('Prize Wheel initialized with ' + prizes.length + ' prizes');
     });
