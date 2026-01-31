@@ -12,6 +12,67 @@ let mainWindow;
 let phpProcess;
 let isDevMode = !app.isPackaged;
 
+// User data directory for writable files (uploads, config, etc.)
+function getUserDataDir() {
+  return path.join(app.getPath('userData'), 'app-data');
+}
+
+// Copy default data and sounds to userData on first run
+function initUserData() {
+  const userDataDir = getUserDataDir();
+  const webappPath = getWebappPath();
+
+  // Create user data directories
+  const userDataData = path.join(userDataDir, 'data');
+  const userSoundsDir = path.join(userDataDir, 'static', 'sounds');
+
+  if (!fs.existsSync(userDataData)) {
+    fs.mkdirSync(userDataData, { recursive: true });
+    // Copy default data files
+    const srcData = path.join(webappPath, 'data');
+    if (fs.existsSync(srcData)) {
+      const files = fs.readdirSync(srcData);
+      for (const file of files) {
+        const srcFile = path.join(srcData, file);
+        if (fs.statSync(srcFile).isFile()) {
+          fs.copyFileSync(srcFile, path.join(userDataData, file));
+        }
+      }
+      // Copy presets subdirectory if exists
+      const srcPresets = path.join(srcData, 'presets');
+      if (fs.existsSync(srcPresets)) {
+        const destPresets = path.join(userDataData, 'presets');
+        fs.mkdirSync(destPresets, { recursive: true });
+        const presetFiles = fs.readdirSync(srcPresets);
+        for (const file of presetFiles) {
+          const srcFile = path.join(srcPresets, file);
+          if (fs.statSync(srcFile).isFile()) {
+            fs.copyFileSync(srcFile, path.join(destPresets, file));
+          }
+        }
+      }
+    }
+  }
+
+  if (!fs.existsSync(userSoundsDir)) {
+    fs.mkdirSync(userSoundsDir, { recursive: true });
+    // Copy default sounds
+    const srcSounds = path.join(webappPath, 'static', 'sounds');
+    if (fs.existsSync(srcSounds)) {
+      const files = fs.readdirSync(srcSounds);
+      for (const file of files) {
+        const srcFile = path.join(srcSounds, file);
+        if (fs.statSync(srcFile).isFile()) {
+          fs.copyFileSync(srcFile, path.join(userSoundsDir, file));
+        }
+      }
+    }
+  }
+
+  console.log('User data directory:', userDataDir);
+  return userDataDir;
+}
+
 // Paths differ between development and production
 function getResourcePath(relativePath) {
   if (isDevMode) {
@@ -99,15 +160,27 @@ async function startPHPServer() {
     return;
   }
 
+  // Initialize writable user data directory (for packaged builds)
+  let userDataDir = null;
+  if (!isDevMode) {
+    userDataDir = initUserData();
+  }
+
   // Start PHP built-in server with index.php as router
   // This ensures all requests (including /dashboard, /odds) are
   // routed through index.php instead of returning 404
+  const env = { ...process.env };
+  if (userDataDir) {
+    env.USER_DATA_DIR = userDataDir;
+  }
+
   phpProcess = spawn(phpPath, [
     '-S', `${PHP_HOST}:${PHP_PORT}`,
     '-t', webappPath,
     path.join(webappPath, 'index.php')
   ], {
     cwd: webappPath,
+    env: env,
     stdio: ['ignore', 'pipe', 'pipe']
   });
 
